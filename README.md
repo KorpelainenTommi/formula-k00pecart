@@ -1,3 +1,3 @@
 # K00PECART
 
-Programming studio 2 formula project
+Formula project for programming studio 2
