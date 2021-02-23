@@ -1,4 +1,4 @@
-package formula
+package formula.application
 
 import java.awt.event.KeyEvent
 import java.awt.{Dimension, Graphics, KeyEventDispatcher}
@@ -16,7 +16,7 @@ object MainApplication extends App {
   //Example of globally catching key events
   java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager.addKeyEventDispatcher(new KeyEventDispatcher {
     override def dispatchKeyEvent(e: KeyEvent): Boolean = {
-      if(e.getID == java.awt.event.KeyEvent.KEY_PRESSED) {
+      if(e.getID == KeyEvent.KEY_PRESSED) {
       JOptionPane.showMessageDialog(topWindow, "Key: " + e.getKeyChar)
       }
       false
