@@ -40,13 +40,23 @@ object MainApplication extends App {
   def minimize() = setState(java.awt.Frame.ICONIFIED)
 
   def normalize() = {
+    topWindow.dispose()
     topWindow.setUndecorated(false)
     setState(java.awt.Frame.NORMAL)
+    topWindow.setMinimumSize(settings.screenSize)
+    topWindow.setSize(settings.screenSize)
+    topWindow.setExtendedState(topWindow.getExtendedState & ~java.awt.Frame.MAXIMIZED_BOTH)
+    topWindow.setVisible(true)
+    currentScreen.redraw()
   }
 
   def maximize() = {
+    topWindow.dispose()
     topWindow.setUndecorated(true)
+    topWindow.setSize(settings.screenSize)
     setState(java.awt.Frame.MAXIMIZED_BOTH)
+    topWindow.setVisible(true)
+    currentScreen.redraw()
   }
 
   def close() = {
@@ -66,13 +76,9 @@ object MainApplication extends App {
     else {
       normalize()
     }
-    topWindow.setPreferredSize(settings.screenSize)
-    topWindow.setMinimumSize(settings.screenSize)
-    currentScreen.redraw()
   }
 
   updateSettings(FormulaIO.loadSettings)
-  topWindow.setVisible(true)
 
   def messageBox(message: String) = {
     JOptionPane.showMessageDialog(topWindow, message)

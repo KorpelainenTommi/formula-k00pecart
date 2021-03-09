@@ -3,6 +3,8 @@ import java.awt.Graphics
 import java.awt.image.BufferedImage
 import javax.swing._
 import formula.io.FormulaIO
+
+import java.awt.event.KeyEvent
 class MainMenuScreen() extends Screen {
 
   private var backgroundImage: Option[BufferedImage] = None
@@ -31,4 +33,16 @@ class MainMenuScreen() extends Screen {
   override def redraw(): Unit = {
 
   }
+
+
+  override def handleKey(e: KeyEvent): Unit = {
+    if(e.getID == KeyEvent.KEY_PRESSED && e.getKeyCode == KeyEvent.VK_F11) {
+      MainApplication.maximize()
+    }
+
+    if(e.getID == KeyEvent.KEY_PRESSED && e.getKeyCode == KeyEvent.VK_F12) {
+      MainApplication.normalize()
+    }
+  }
+
 }
