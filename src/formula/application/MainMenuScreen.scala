@@ -22,6 +22,7 @@ class MainMenuScreen() extends Screen {
   var raceButton: GrayButton      = null
   var settingsButton: GrayButton  = null
   var trackToolButton: GrayButton = null
+  var versionLabel: ImpactLabel   = null
 
 
 
@@ -56,9 +57,13 @@ class MainMenuScreen() extends Screen {
     settingsButton.setPercentBounds(0.65, 0.25, 0.14, 0.07)
     panel.add(settingsButton)
 
-    exitButton = new GrayButton("Exit the game")
+    exitButton = new GrayButton("Exit the game", () => MainApplication.close())
     exitButton.setPercentBounds(0.7, 0.35, 0.14, 0.07)
     panel.add(exitButton)
+
+    versionLabel = new ImpactLabel("ver1.0 Tommi Korpelainen")
+    versionLabel.setPercentBounds(0.34, 0.88, 0.2, 0.05)
+    panel.add(versionLabel)
 
     redraw()
   }
@@ -68,6 +73,7 @@ class MainMenuScreen() extends Screen {
     trackToolButton.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
     settingsButton.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
     exitButton.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
+    versionLabel.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
 
     MainApplication.topWindow.revalidate()
     MainApplication.topWindow.repaint()

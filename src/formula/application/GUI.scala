@@ -23,9 +23,18 @@ package formula.application {
     }
   }
 
+  class ImpactLabel(val text: String, val fontSize: Float = 1F, val fontColor: Color = Color.BLACK) extends JLabel(text) with PercentBounds {
+    override def component = this
+    this.setForeground(fontColor)
 
+    override def updateBounds(width: Double, height: Double) = {
+      super.updateBounds(width, height)
+      this.setFont(FormulaIO.getFont(Fonts.Impact).deriveFont((fontSize * width * 0.018).toFloat))
+    }
+  }
 
-  class GrayButton(val title: String) extends JButton(title) with PercentBounds {
+  class GrayButton(val title: String, val onclick: () => Unit = () => ()) extends JButton(title) with PercentBounds {
+
     override def paintComponent(g: Graphics) = {
       val img = FormulaIO.getTexture(Textures.Button)
       g.drawImage(img, 0, 0, getWidth, getHeight, null)
@@ -56,6 +65,7 @@ package formula.application {
       }
       override def mousePressed(e: MouseEvent) = {
         button.setBackground(new Color(120, 125, 155, 150))
+        onclick()
       }
       override def mouseReleased(e: MouseEvent) = {
         button.setBackground(new Color(0, 0, 0, 0))
