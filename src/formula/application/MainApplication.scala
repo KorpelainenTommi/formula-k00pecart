@@ -29,6 +29,7 @@ object MainApplication extends App {
   private val graphicsEnvironment = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment
   private val configuration = graphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration
   val topWindow = new JFrame("K00PECART", configuration)
+  topWindow.setIconImage(FormulaIO.loadImage("icon0.png"))
 
   //Set bounds for maximized borderless
   topWindow.setMaximizedBounds(configuration.getBounds)
