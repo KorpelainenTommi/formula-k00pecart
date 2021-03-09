@@ -5,6 +5,7 @@ import java.nio.{ByteBuffer, ByteOrder}
 import java.awt.image.BufferedImage
 import scala.collection.mutable.HashMap
 import Textures.Texture
+import Fonts.Font
 
 object FormulaIO {
 
@@ -16,6 +17,9 @@ object FormulaIO {
 
 
   val loadedTextures = HashMap[Texture, BufferedImage]()
+  val loadedFonts = HashMap[Font, java.awt.Font]()
+  val missingTexture = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB)
+  val defaultFont = new javax.swing.JLabel().getFont
 
 
   //Using absolute filepaths instead of relative paths gives debugging more clarity
@@ -94,7 +98,16 @@ object FormulaIO {
   //Load a texture, and cache it for future access
   def getTexture(t: Texture) = {
     if(!loadedTextures.contains(t)) {
-      loadedTextures(t) = loadImage(Textures.path(t))
+      try {
+        loadedTextures(t) = loadImage(Textures.path(t))
+      }
+
+      catch {
+        case e: ResourceLoadException => {
+          loadedTextures(t) = missingTexture
+          throw e
+        }
+      }
     }
     loadedTextures(t)
   }
@@ -105,6 +118,30 @@ object FormulaIO {
 
   def unloadAllTextures() = {
     loadedTextures.clear()
+  }
+
+
+  def getFont(f: Font) = {
+    if(!loadedFonts.contains(f)) {
+      try {
+        loadedFonts(f) = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, new File(resolvePath("data", "fonts", Fonts.path(f))))
+      }
+      catch {
+        case _: IOException | _: java.awt.FontFormatException => {
+          //Replace this font with a default font. Subsequent calls to getFont won't throw
+          loadedFonts(f) = defaultFont
+          throw new ResourceLoadException(Fonts.path(f))
+        }
+      }
+    }
+    loadedFonts(f)
+  }
+
+  def listTracks = {
+    val trackDir = new File(resolvePath("data", "tracks"))
+    trackDir.listFiles(new FilenameFilter {
+      override def accept(dir: File, name: String) = name.endsWith(".trck")
+    }).map(_.getName).toVector
   }
 
 

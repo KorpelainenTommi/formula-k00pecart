@@ -21,13 +21,30 @@ object MainApplication extends App {
     screen.activate()
   }
 
-  private var _settings: Settings = null
+  private var _settings: Settings = Settings.defaultSettings
   def settings = _settings
 
   //Initialization
 
   private val graphicsEnvironment = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment
   private val configuration = graphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration
+
+  //Register fonts
+
+  private var fontLoadError = false
+  formula.io.Fonts.values.foreach(f => {
+    try {
+      graphicsEnvironment.registerFont(FormulaIO.getFont(f))
+    }
+
+    catch {
+      case e: FormulaIO.ResourceLoadException => fontLoadError = true
+    }
+  })
+
+  if(fontLoadError) messageBox("Not all fonts could be loaded successfully")
+
+
   val topWindow = new JFrame("K00PECART", configuration)
 
   try {
@@ -43,6 +60,8 @@ object MainApplication extends App {
   topWindow.setMaximizedBounds(configuration.getBounds)
   transition(new MainMenuScreen())
 
+  var maximized = false
+
   private def setState(i: Int) = {
     topWindow.setExtendedState(topWindow.getExtendedState | i)
   }
@@ -56,6 +75,7 @@ object MainApplication extends App {
     topWindow.setSize(settings.screenSize)
     topWindow.setExtendedState(topWindow.getExtendedState & ~java.awt.Frame.MAXIMIZED_BOTH)
     topWindow.setVisible(true)
+    maximized = false
     currentScreen.redraw()
   }
 
@@ -65,6 +85,7 @@ object MainApplication extends App {
     topWindow.setSize(settings.screenSize)
     setState(java.awt.Frame.MAXIMIZED_BOTH)
     topWindow.setVisible(true)
+    maximized = true
     currentScreen.redraw()
   }
 
@@ -89,6 +110,12 @@ object MainApplication extends App {
 
   updateSettings(FormulaIO.loadSettings)
 
+
+
+  def windowWidth  = if(maximized) configuration.getBounds.width else settings.screenSize.x
+  def windowHeight = if(maximized) configuration.getBounds.height else settings.screenSize.y
+
+
   def messageBox(message: String) = {
     JOptionPane.showMessageDialog(topWindow, message)
   }
@@ -100,6 +127,7 @@ object MainApplication extends App {
       false
     }
   })
+
 
 
   /*
