@@ -1,13 +1,17 @@
 package formula.io
 import java.io._
 import javax.imageio._
+import java.nio.{ByteBuffer, ByteOrder}
 import java.awt.image.BufferedImage
 import scala.collection.mutable.HashMap
 import Textures.Texture
 
 object FormulaIO {
 
+  //Explicitly use little endian for cross platform compatibility of files
+  private val ENDIAN = ByteOrder.LITTLE_ENDIAN
   private val BUFFER_SIZE = 1024
+  val STRING_SEP = '\u00b6'.toByte
   class ResourceLoadException(val resourcePath: String) extends Exception(s"No resource at path $resourcePath could be loaded")
 
 
@@ -20,6 +24,12 @@ object FormulaIO {
   def resolvePath(parts: String*) = parts.foldLeft(_cwd)(_ + File.separator + _)
   def currentDirectory = _cwd
 
+  def loadDouble(buf: Array[Byte], offset: Int) = ByteBuffer.wrap(buf, offset, 8).order(ENDIAN).getDouble
+  def saveDouble(d: Double)                     = ByteBuffer.allocate(8).order(ENDIAN).putDouble(d).array
+
+  def loadInt(buf: Array[Byte], offset: Int)    = ByteBuffer.wrap(buf, offset, 4).order(ENDIAN).getInt
+  def saveInt(i: Int)                           = ByteBuffer.allocate(4).order(ENDIAN).putInt(i)
+
 
   private def readAll(rdr: Reader) = {
     val data = scala.collection.mutable.ArrayBuffer[Char]()
@@ -27,7 +37,7 @@ object FormulaIO {
     while(rdr.read(buffer) != -1) {
       data.appendAll(buffer)
     }
-    data.toArray
+    data.toArray.map(_.toByte)
   }
 
   def saveSettings(settings: Settings) = {
@@ -35,7 +45,7 @@ object FormulaIO {
 
     try {
       wtr = Some(new BufferedWriter(new FileWriter(resolvePath("data", "settings.dat"))))
-      wtr.get.write(Settings.save(settings).toArray)
+      wtr.get.write(Settings.save(settings).map(_.toChar))
       true
     }
 

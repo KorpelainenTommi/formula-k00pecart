@@ -24,20 +24,31 @@ object MainApplication extends App {
   private var _settings: Settings = null
   def settings = _settings
 
-
-
-
   //Initialization
-  private val graphicsEnvironment = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration
-  val topWindow = new JFrame("K00PECART", graphicsEnvironment)
+
+  private val graphicsEnvironment = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment
+  private val configuration = graphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration
+  val topWindow = new JFrame("K00PECART", configuration)
+
+  //Set bounds for maximized borderless
+  topWindow.setMaximizedBounds(configuration.getBounds)
   transition(new MainMenuScreen())
 
   private def setState(i: Int) = {
     topWindow.setExtendedState(topWindow.getExtendedState | i)
   }
-  def normalize() = setState(java.awt.Frame.NORMAL)
-  def minimize()  = setState(java.awt.Frame.ICONIFIED)
-  def maximize()  = setState(java.awt.Frame.MAXIMIZED_BOTH)
+  def minimize() = setState(java.awt.Frame.ICONIFIED)
+
+  def normalize() = {
+    topWindow.setUndecorated(false)
+    setState(java.awt.Frame.NORMAL)
+  }
+
+  def maximize() = {
+    topWindow.setUndecorated(true)
+    setState(java.awt.Frame.MAXIMIZED_BOTH)
+  }
+
   def close() = {
     //Close with dispatchEvent instead of System.exit or dispose, so closing is not brute force
     topWindow.dispatchEvent(new WindowEvent(topWindow, WindowEvent.WINDOW_CLOSING))
@@ -54,15 +65,18 @@ object MainApplication extends App {
 
     else {
       normalize()
-      topWindow.setPreferredSize(settings.screenSize)
-      topWindow.setMinimumSize(settings.screenSize)
     }
+    topWindow.setPreferredSize(settings.screenSize)
+    topWindow.setMinimumSize(settings.screenSize)
     currentScreen.redraw()
   }
 
   updateSettings(FormulaIO.loadSettings)
   topWindow.setVisible(true)
 
+  def messageBox(message: String) = {
+    JOptionPane.showMessageDialog(topWindow, message)
+  }
 
   //Hook up keyEvents
   KeyboardFocusManager.getCurrentKeyboardFocusManager.addKeyEventDispatcher(new KeyEventDispatcher {
@@ -71,6 +85,7 @@ object MainApplication extends App {
       false
     }
   })
+
 
   /*
   val bufImg = javax.imageio.ImageIO.read(new java.io.File(FormulaIO.resolvePath("data", "textures", "goal0.png")))
