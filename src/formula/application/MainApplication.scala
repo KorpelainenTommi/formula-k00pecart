@@ -17,6 +17,7 @@ object MainApplication extends App {
   private var _currentScreen: Screen = null
   def currentScreen = _currentScreen
   def transition(screen: Screen) = {
+    if(_currentScreen != null) _currentScreen.deactivate()
     _currentScreen = screen
     screen.activate()
   }
@@ -30,19 +31,9 @@ object MainApplication extends App {
   private val configuration = graphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration
 
   //Register fonts
-
-  private var fontLoadError = false
   formula.io.Fonts.values.foreach(f => {
-    try {
-      graphicsEnvironment.registerFont(FormulaIO.getFont(f))
-    }
-
-    catch {
-      case e: FormulaIO.ResourceLoadException => fontLoadError = true
-    }
+    graphicsEnvironment.registerFont(FormulaIO.getFont(f))
   })
-
-  if(fontLoadError) messageBox("Not all fonts could be loaded successfully")
 
 
   val topWindow = new JFrame("K00PECART", configuration)

@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage
 import scala.collection.mutable.HashMap
 import Textures.Texture
 import Fonts.Font
+import formula.application.MainApplication
 
 object FormulaIO {
 
@@ -36,12 +37,13 @@ object FormulaIO {
 
 
   private def readAll(rdr: Reader) = {
+    var charsRead = 0
     val data = scala.collection.mutable.ArrayBuffer[Char]()
     val buffer = Array.ofDim[Char](BUFFER_SIZE)
-    while(rdr.read(buffer) != -1) {
+    while({charsRead = rdr.read(buffer); charsRead != -1}) {
       data.appendAll(buffer)
     }
-    data.toArray.map(_.toByte)
+    data.take(charsRead).toArray.map(_.toByte)
   }
 
   def saveSettings(settings: Settings) = {
@@ -81,7 +83,6 @@ object FormulaIO {
     }
   }
 
-  //When loading images, the caller is responsible for handling missing files and other exceptions
 
   //Load an image, but don't cache it
   def loadImage(name: String) = {
@@ -105,7 +106,7 @@ object FormulaIO {
       catch {
         case e: ResourceLoadException => {
           loadedTextures(t) = missingTexture
-          throw e
+          MainApplication.messageBox(e.getMessage)
         }
       }
     }
@@ -128,14 +129,15 @@ object FormulaIO {
       }
       catch {
         case _: IOException | _: java.awt.FontFormatException => {
-          //Replace this font with a default font. Subsequent calls to getFont won't throw
           loadedFonts(f) = defaultFont
-          throw new ResourceLoadException(Fonts.path(f))
+          MainApplication.messageBox(new ResourceLoadException(Fonts.path(f)).getMessage)
         }
       }
     }
     loadedFonts(f)
   }
+
+
 
   def listTracks = {
     val trackDir = new File(resolvePath("data", "tracks"))

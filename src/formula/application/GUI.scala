@@ -1,8 +1,41 @@
 import javax.swing._
 import formula.io._
 import java.awt.{Graphics, Color}
+import java.awt.image.BufferedImage
 import java.awt.event._
 package formula.application {
+
+
+  trait TextureLoader {
+    protected def textures: Seq[Textures.Texture]
+    protected def loadTextures() = {
+      textures.foreach(t => FormulaIO.getTexture(t))
+    }
+  }
+
+  trait BackgroundPanel {
+    protected def backgroundName: String
+    protected def additionalPaint(g: Graphics) = {}
+    protected def loadBackground() = {
+      try {
+        backgroundImage = Some(FormulaIO.loadImage(backgroundName))
+      }
+      catch {
+        case e: FormulaIO.ResourceLoadException => MainApplication.messageBox(e.getMessage)
+      }
+    }
+
+    private var backgroundImage: Option[BufferedImage] = None
+    protected val _panel = new JPanel() {
+      override def paintComponent(g: Graphics): Unit = {
+        super.paintComponent(g)
+        backgroundImage.foreach(img => g.drawImage(img, 0, 0, getWidth, getHeight, null))
+        additionalPaint(g)
+      }
+    }
+  }
+
+
 
   trait PercentBounds {
     def component: JComponent
@@ -23,13 +56,13 @@ package formula.application {
     }
   }
 
-  class ImpactLabel(val text: String, val fontSize: Float = 1F, val fontColor: Color = Color.BLACK) extends JLabel(text) with PercentBounds {
+  class FontLabel(val text: String, val labelFont: Fonts.Font = Fonts.Impact, val fontSize: Float = 1F, val fontColor: Color = Color.DARK_GRAY) extends JLabel(text) with PercentBounds {
     override def component = this
     this.setForeground(fontColor)
 
     override def updateBounds(width: Double, height: Double) = {
       super.updateBounds(width, height)
-      this.setFont(FormulaIO.getFont(Fonts.Impact).deriveFont((fontSize * width * 0.018).toFloat))
+      this.setFont(FormulaIO.getFont(labelFont).deriveFont((fontSize * width * 0.018).toFloat))
     }
   }
 

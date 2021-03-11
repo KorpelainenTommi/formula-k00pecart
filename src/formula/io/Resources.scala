@@ -1,5 +1,10 @@
 package formula.io
-object Textures extends Enumeration {
+
+trait Resource extends Enumeration {
+  def path(r: Value): String
+}
+
+object Textures extends Resource {
   type Texture = Value
   val Goal = Value
   val Road = Value
@@ -14,13 +19,15 @@ object Textures extends Enumeration {
   }
 }
 
-object Fonts extends Enumeration {
+object Fonts extends Resource {
   type Font = Value
   val Impact = Value
+  val TimesNewRoman = Value
 
   def path(f: Font) = {
     f match {
       case Impact => "impact.ttf"
+      case TimesNewRoman => "timesnewroman.ttf"
     }
   }
 }
