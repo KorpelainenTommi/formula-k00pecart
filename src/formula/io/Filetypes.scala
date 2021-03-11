@@ -26,7 +26,6 @@ object Settings extends Serializable[Settings] {
     Array[Byte](if(saveable.fullScreen) 1 else 0) ++ resBytes
   }
   override def load(bytes: Array[Byte], start: Int, count: Int) = {
-    println(bytes.size)
     if(bytes.size < start + 17) {
       defaultSettings
     }
