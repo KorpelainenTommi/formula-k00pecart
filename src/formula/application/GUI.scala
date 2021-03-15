@@ -56,7 +56,7 @@ package formula.application {
     }
   }
 
-  class FontLabel(val text: String, val labelFont: Fonts.Font = Fonts.Impact, val fontSize: Float = 1F, val fontColor: Color = Color.DARK_GRAY) extends JLabel(text) with PercentBounds {
+  class FontLabel(txt: String, val labelFont: Fonts.Font = Fonts.Impact, val fontSize: Float = 1F, val fontColor: Color = Color.DARK_GRAY) extends JLabel(txt) with PercentBounds {
     override def component = this
     this.setForeground(fontColor)
 
@@ -64,6 +64,10 @@ package formula.application {
       super.updateBounds(width, height)
       this.setFont(FormulaIO.getFont(labelFont).deriveFont((fontSize * width * 0.018).toFloat))
     }
+
+    def text = this.getText
+    def text_=(value: String) = this.setText(value)
+
   }
 
   class GrayButton(val title: String, val onclick: () => Unit = () => ()) extends JButton(title) with PercentBounds {
@@ -105,6 +109,8 @@ package formula.application {
       }
     })
   }
+
+
 
 
 }

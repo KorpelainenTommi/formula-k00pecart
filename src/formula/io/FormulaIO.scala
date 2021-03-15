@@ -222,5 +222,16 @@ object FormulaIO {
     }
   }
 
+  def loadDemoBitSet(name: String) = {
+    val demoimg = FormulaIO.loadImage(name)
+    val raster = demoimg.getRaster
+    val buffer = raster.getDataElements(0, 0, 256, 256, null).asInstanceOf[Array[Byte]]
+    val bitSet = scala.collection.mutable.BitSet()
+    for(i <- 0 until (256*256)) {
+      if(buffer(i*4) == 0x0) bitSet.add(i)
+    }
+    bitSet
+  }
+
 
 }

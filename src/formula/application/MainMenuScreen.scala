@@ -21,7 +21,7 @@ class MainMenuScreen extends StaticScreen("background0.png", Textures.Button) {
     raceButton.setPercentBounds(0.55, 0.05, 0.14, 0.07)
     panel.add(raceButton)
 
-    trackToolButton = new GrayButton("Track tool")
+    trackToolButton = new GrayButton("Track tool", () => MainApplication.transition(new TrackSelectScreen))
     trackToolButton.setPercentBounds(0.6, 0.15, 0.14, 0.07)
     panel.add(trackToolButton)
 
