@@ -10,6 +10,8 @@ object Textures extends Resource {
   val Road = Value
   val Button = Value
 
+  val GAME_TEXTURES = Vector(Goal, Road)
+
   def path(t: Texture) = {
     t match {
       case Button => "Button0.png"

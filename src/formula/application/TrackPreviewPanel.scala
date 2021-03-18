@@ -2,7 +2,7 @@ package formula.application
 import javax.swing._
 import formula.engine.TrackPreview
 import java.awt.Graphics
-class TrackPreviewPanel extends JPanel with PercentBounds {
+class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
   this.setLayout(null)
   override def component = this
 

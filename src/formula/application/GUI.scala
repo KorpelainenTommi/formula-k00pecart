@@ -35,14 +35,11 @@ package formula.application {
     }
   }
 
-
-
   trait PercentBounds {
-    def component: JComponent
-    private var pX: Double = 0
-    private var pY: Double = 0
-    private var pW: Double = 0
-    private var pH: Double = 0
+    protected var pX: Double = 0
+    protected var pY: Double = 0
+    protected var pW: Double = 0
+    protected var pH: Double = 0
 
     def setPercentBounds(x: Double, y: Double, w: Double, h: Double) = {
       pX = x
@@ -51,12 +48,17 @@ package formula.application {
       pH = h
     }
 
-    def updateBounds(width: Double, height: Double) = {
+    def updateBounds(width: Double, height: Double)
+  }
+
+  trait ComponentPercentBounds extends PercentBounds {
+    def component: JComponent
+    override def updateBounds(width: Double, height: Double) = {
       component.setBounds((pX*width).toInt, (pY*height).toInt, (pW*width).toInt, (pH*height).toInt)
     }
   }
 
-  trait TextPercentBounds extends PercentBounds {
+  trait TextPercentBounds extends ComponentPercentBounds {
     protected def textFont: Fonts.Font
     protected def fontSize: Float
     override def updateBounds(width: Double, height: Double) = {
@@ -73,7 +75,7 @@ package formula.application {
 
   }
 
-  class GrayButton(val title: String, val onclick: () => Unit = () => ()) extends JButton(title) with PercentBounds {
+  class GrayButton(val title: String, val onclick: () => Unit = () => ()) extends JButton(title) with ComponentPercentBounds {
 
     override def paintComponent(g: Graphics) = {
       val img = FormulaIO.getTexture(Textures.Button)
@@ -120,7 +122,7 @@ package formula.application {
     this.setText(txt)
   }
 
-  class TextArea(txt: String, val textFont: Fonts.Font = Fonts.Impact, val color: Color = Color.DARK_GRAY, protected val textArea: JTextArea = new JTextArea) extends JScrollPane(textArea) with PercentBounds {
+  class TextArea(txt: String, val textFont: Fonts.Font = Fonts.Impact, val color: Color = Color.DARK_GRAY, protected val textArea: JTextArea = new JTextArea) extends JScrollPane(textArea) with ComponentPercentBounds {
     protected val fontSize = 1F
     override def component = this
     textArea.setForeground(color)
@@ -138,8 +140,6 @@ package formula.application {
       textArea.setFont(FormulaIO.getFont(textFont).deriveFont((fontSize * width * 0.018).toFloat))
     }
   }
-
-  
 
 
 

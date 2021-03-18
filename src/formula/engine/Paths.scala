@@ -10,13 +10,11 @@ object ClosedPath extends Serializable[ClosedPath] {
   }
 
   def apply(points: V2D*) = new ClosedPath(points)
-  def apply(points: Seq[V2D]) = new ClosedPath(points)
 
 }
 
 object ClosedLoop {
   def apply(points: V2D*) = new ClosedLoop(points)
-  def apply(points: Seq[V2D]) = new ClosedLoop(points)
 }
 
 class ClosedPath(points: Seq[V2D]) extends Seq[V2D] {

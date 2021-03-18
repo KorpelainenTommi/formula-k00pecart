@@ -1,9 +1,20 @@
 package formula.application
 abstract class Screen {
   def panel: javax.swing.JPanel
-  def activate()
-  def deactivate()
-  def redraw()
+  def activate() = {
+    MainApplication.topWindow.getContentPane.add(panel)
+    panel.setLayout(null)
+  }
+
+  def deactivate() = {
+    MainApplication.topWindow.getContentPane.remove(panel)
+  }
+
+  def redraw() = {
+    MainApplication.topWindow.revalidate()
+    MainApplication.topWindow.repaint()
+  }
+
   def handleKey(e: java.awt.event.KeyEvent) = {}
 }
 
@@ -13,15 +24,8 @@ abstract class StaticScreen(background: String, textureList: formula.io.Textures
   override def panel = _panel
 
   override def activate() = {
-    MainApplication.topWindow.getContentPane.add(panel)
-    panel.setLayout(null)
-
+    super.activate()
     loadBackground()
     loadTextures()
   }
-
-  override def deactivate() = {
-    MainApplication.topWindow.getContentPane.remove(panel)
-  }
-
 }

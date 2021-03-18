@@ -1,5 +1,8 @@
-package formula.application
+package formula.application.screens
+
+import formula.application._
 import formula.io._
+
 import javax.swing._
 class TrackSelectScreen extends StaticScreen("trackselect0.png", Textures.Button) {
 
@@ -38,8 +41,7 @@ class TrackSelectScreen extends StaticScreen("trackselect0.png", Textures.Button
     backButton.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
     trackPreview.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
     testTBox.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
-    MainApplication.topWindow.revalidate()
-    MainApplication.topWindow.repaint()
+    super.redraw()
   }
 
 

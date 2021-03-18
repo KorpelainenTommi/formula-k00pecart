@@ -1,9 +1,7 @@
-package formula.application
-import java.awt.Graphics
-import java.awt.image.BufferedImage
-import javax.swing._
+package formula.application.screens
+
+import formula.application.{FontLabel, GrayButton, MainApplication, StaticScreen}
 import formula.io._
-import formula.engine.V2D
 
 import java.awt.event.KeyEvent
 class MainMenuScreen extends StaticScreen("background0.png", Textures.Button) {
@@ -47,8 +45,7 @@ class MainMenuScreen extends StaticScreen("background0.png", Textures.Button) {
     exitButton.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
     versionLabel.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
 
-    MainApplication.topWindow.revalidate()
-    MainApplication.topWindow.repaint()
+    super.redraw()
   }
 
 

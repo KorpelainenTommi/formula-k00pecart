@@ -1,4 +1,6 @@
-package formula.application
+package formula.application.screens
+
+import formula.application.{MainApplication, StaticScreen}
 import formula.io._
 
 class ResultScreen extends StaticScreen("results0.png", Textures.Button) {
@@ -14,7 +16,7 @@ class ResultScreen extends StaticScreen("results0.png", Textures.Button) {
   }
 
   override def redraw() = {
-    MainApplication.topWindow.revalidate()
-    MainApplication.topWindow.repaint()
+
+    super.redraw()
   }
 }
