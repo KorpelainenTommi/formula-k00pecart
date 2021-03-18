@@ -3,7 +3,7 @@ package formula.application.screens
 import formula.application.{MainApplication, StaticScreen}
 import formula.io._
 
-class ResultScreen extends StaticScreen("results0.png", Textures.Button) {
+class ResultScreen extends StaticScreen("screen0.png", Textures.Button) {
 
 
 

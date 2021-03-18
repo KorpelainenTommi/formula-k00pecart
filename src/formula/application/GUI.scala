@@ -4,6 +4,7 @@ import java.awt.{Graphics, Color}
 import java.awt.image.BufferedImage
 import java.awt.event._
 package formula.application {
+  import java.awt.Component
 
 
   trait TextureLoader {
@@ -67,7 +68,13 @@ package formula.application {
     }
   }
 
-  class FontLabel(txt: String, val textFont: Fonts.Font = Fonts.Impact, val fontSize: Float = 1F, val fontColor: Color = Color.DARK_GRAY) extends JLabel(txt) with TextPercentBounds {
+  class FontLabel
+  (txt: String,
+  val textFont: Fonts.Font = Fonts.Impact,
+  val fontSize: Float = 1F,
+  val fontColor: Color = Color.DARK_GRAY)
+  extends JLabel(txt) with TextPercentBounds {
+
     override def component = this
     this.setForeground(fontColor)
     def text = this.getText
@@ -75,7 +82,10 @@ package formula.application {
 
   }
 
-  class GrayButton(val title: String, val onclick: () => Unit = () => ()) extends JButton(title) with ComponentPercentBounds {
+  class GrayButton
+  (val title: String,
+  val onclick: () => Unit = () => ())
+  extends JButton(title) with ComponentPercentBounds {
 
     override def paintComponent(g: Graphics) = {
       val img = FormulaIO.getTexture(Textures.Button)
@@ -115,14 +125,25 @@ package formula.application {
     })
   }
 
-  class TextInput(txt: String, val textFont: Fonts.Font = Fonts.Impact, val color: Color = Color.DARK_GRAY) extends JTextField(1) with TextPercentBounds {
+  class TextInput
+  (txt: String,
+  val textFont: Fonts.Font = Fonts.Impact,
+  val color: Color = Color.DARK_GRAY)
+  extends JTextField(1) with TextPercentBounds {
+
     override protected def fontSize = 1F
     override def component = this
     this.setForeground(color)
     this.setText(txt)
   }
 
-  class TextArea(txt: String, val textFont: Fonts.Font = Fonts.Impact, val color: Color = Color.DARK_GRAY, protected val textArea: JTextArea = new JTextArea) extends JScrollPane(textArea) with ComponentPercentBounds {
+  class TextArea
+  (txt: String,
+  val textFont: Fonts.Font = Fonts.Impact,
+  val color: Color = Color.DARK_GRAY,
+  protected val textArea: JTextArea = new JTextArea)
+  extends JScrollPane(textArea) with ComponentPercentBounds {
+
     protected val fontSize = 1F
     override def component = this
     textArea.setForeground(color)
@@ -141,7 +162,39 @@ package formula.application {
     }
   }
 
+  class DropDown
+  (options: Seq[String],
+  val textFont: Fonts.Font = Fonts.Impact)
+  extends JComboBox[String](options.toArray) with TextPercentBounds {
 
+    override def component = this
+    protected val fontSize = 1F
+
+  }
+
+  class ImageDisplayArea
+  (entries: Seq[BufferedImage],
+  protected val imageList: JList[ImageIcon] = new JList[ImageIcon]())
+  extends JScrollPane(imageList) with ComponentPercentBounds {
+
+    override def component = this
+    private val icons = entries.map(new ImageIcon(_)).toArray
+    imageList.setListData(icons)
+
+    imageList.setCellRenderer(new DefaultListCellRenderer {
+      override def getListCellRendererComponent(list: JList[_], value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component = {
+        val label = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus).asInstanceOf[JLabel]
+        label.setIcon(value.asInstanceOf[ImageIcon])
+        label
+      }
+    })
+
+    this.getVerticalScrollBar.setUI(new javax.swing.plaf.basic.BasicScrollBarUI(){
+      override protected def configureScrollBarColors() = this.thumbColor = new Color(163, 184, 204, 255)
+    })
+
+    this.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
+  }
 
 
 }
