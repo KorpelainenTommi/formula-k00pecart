@@ -7,6 +7,7 @@ class TrackSelectScreen extends StaticScreen("trackselect0.png", Textures.Button
   var trackPanel: JScrollPane = null
   var trackList: JList[String] = null
   var trackPreview: TrackPreviewPanel = null
+  var testTBox: TextArea = null
 
   override def activate() = {
     super.activate()
@@ -18,6 +19,11 @@ class TrackSelectScreen extends StaticScreen("trackselect0.png", Textures.Button
     trackPreview = new TrackPreviewPanel
     trackPreview.setPercentBounds(0.55, 0.05, 0.4, 0.7)
     panel.add(trackPreview)
+
+    testTBox = new TextArea("Insert text here")
+    testTBox.setPercentBounds(0.2, 0.4, 0.28, 0.28)
+    panel.add(testTBox)
+
 
     trackList = new JList[String]()
     trackPanel = new JScrollPane(trackList)
@@ -31,6 +37,7 @@ class TrackSelectScreen extends StaticScreen("trackselect0.png", Textures.Button
   override def redraw() = {
     backButton.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
     trackPreview.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
+    testTBox.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
     MainApplication.topWindow.revalidate()
     MainApplication.topWindow.repaint()
   }

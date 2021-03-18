@@ -15,7 +15,7 @@ object TrackPreview extends Serializable[TrackPreview] {
     idx += descriptionData._2
     val fastestTimesSize = bytes(idx)
     idx += 1
-    val fastestTimes = Array.fill[(Int, String)](fastestTimesSize)({
+    val fastestTimes = Array.fill(fastestTimesSize)({
       val t = FormulaIO.loadInt(bytes, idx)
       idx += 4
       val descData = FormulaIO.loadString(bytes, idx)

@@ -104,6 +104,8 @@ object MainApplication extends App {
 
 
 
+
+
   def windowWidth  = if(maximized) configuration.getBounds.width else settings.screenSize.x
   def windowHeight = if(maximized) configuration.getBounds.height else settings.screenSize.y
 

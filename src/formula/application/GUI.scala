@@ -56,15 +56,18 @@ package formula.application {
     }
   }
 
-  class FontLabel(txt: String, val labelFont: Fonts.Font = Fonts.Impact, val fontSize: Float = 1F, val fontColor: Color = Color.DARK_GRAY) extends JLabel(txt) with PercentBounds {
-    override def component = this
-    this.setForeground(fontColor)
-
+  trait TextPercentBounds extends PercentBounds {
+    protected def textFont: Fonts.Font
+    protected def fontSize: Float
     override def updateBounds(width: Double, height: Double) = {
       super.updateBounds(width, height)
-      this.setFont(FormulaIO.getFont(labelFont).deriveFont((fontSize * width * 0.018).toFloat))
+      component.setFont(FormulaIO.getFont(textFont).deriveFont((fontSize * width * 0.018).toFloat))
     }
+  }
 
+  class FontLabel(txt: String, val textFont: Fonts.Font = Fonts.Impact, val fontSize: Float = 1F, val fontColor: Color = Color.DARK_GRAY) extends JLabel(txt) with TextPercentBounds {
+    override def component = this
+    this.setForeground(fontColor)
     def text = this.getText
     def text_=(value: String) = this.setText(value)
 
@@ -109,6 +112,34 @@ package formula.application {
       }
     })
   }
+
+  class TextInput(txt: String, val textFont: Fonts.Font = Fonts.Impact, val color: Color = Color.DARK_GRAY) extends JTextField(1) with TextPercentBounds {
+    override protected def fontSize = 1F
+    override def component = this
+    this.setForeground(color)
+    this.setText(txt)
+  }
+
+  class TextArea(txt: String, val textFont: Fonts.Font = Fonts.Impact, val color: Color = Color.DARK_GRAY, protected val textArea: JTextArea = new JTextArea) extends JScrollPane(textArea) with PercentBounds {
+    protected val fontSize = 1F
+    override def component = this
+    textArea.setForeground(color)
+    textArea.setLineWrap(true)
+    textArea.setText(txt)
+
+    this.getVerticalScrollBar.setUI(new javax.swing.plaf.basic.BasicScrollBarUI(){
+      override protected def configureScrollBarColors() = this.thumbColor = new Color(163, 184, 204, 255)
+    })
+
+    this.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
+
+    override def updateBounds(width: Double, height: Double) = {
+      super.updateBounds(width, height)
+      textArea.setFont(FormulaIO.getFont(textFont).deriveFont((fontSize * width * 0.018).toFloat))
+    }
+  }
+
+  
 
 
 

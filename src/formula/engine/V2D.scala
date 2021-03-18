@@ -1,5 +1,5 @@
 package formula.engine {
-
+import formula.io._
 
   case class V2D(x: Double, y: Double) {
     private def rnd(d: Double) = V2D.rnd(d)
@@ -8,6 +8,7 @@ package formula.engine {
     def -(v: V2D)              = V2D(x-v.x, y-v.y)
     def *(m: Double)           = V2D(m * x, m * y)
     def /(m: Double)           = V2D(x / m, y / m)
+    def unary_-                = V2D(-x, -y)
 
     def length                 = math.sqrt(lengthSqr)
     def lengthR                = rnd(length)
@@ -33,7 +34,7 @@ package formula.engine {
     override def toString()    = s"($x, $y)"
   }
 
-  object V2D {
+  object V2D extends Serializable[V2D] {
     val r = V2D( 1, 0)
     val l = V2D(-1, 0)
     val u = V2D( 0,-1)
@@ -72,6 +73,11 @@ package formula.engine {
       val dy = target.y - origin.y
       V2D((yDir.y * dx - yDir.x * dy) / d, (-xDir.y * dx + xDir.x * dy)/d)
     }
+
+    override def save(saveable: V2D): Array[Byte] = FormulaIO.saveDouble(saveable.x) ++ FormulaIO.saveDouble(saveable.y)
+    override def load(bytes: Array[Byte], start: Int, count: Int): V2D = V2D(FormulaIO.loadDouble(bytes, start), FormulaIO.loadDouble(bytes, start+8))
+
+
   }
 
 }
