@@ -1,60 +1,41 @@
 package formula.application.screens
-
+import formula.engine.TrackPreview
 import formula.application._
 import formula.io._
 
-import java.awt.image.BufferedImage
-import javax.swing._
-class TrackSelectScreen extends StaticScreen("screen0.png", Textures.Button) {
+class TrackSelectScreen extends StaticScreen(Textures.Background_Generic, Textures.Button) {
 
-  var backButton: GrayButton = null
-  var trackPanel: JScrollPane = null
-  var trackList: JList[String] = null
-  var trackPreview: TrackPreviewPanel = null
-  var testTBox: TextArea = null
-  var testDropdown: DropDown = null
-
-  var testImageArray: ImageDisplayArea = null
+  var trackfileNames: Vector[String] = Vector()
+  var trackPreviews: Vector[TrackPreview] = Vector()
 
   override def activate() = {
+
+    trackfileNames = FormulaIO.listTrackFiles
+    trackPreviews = trackfileNames.flatMap(FormulaIO.loadTrackPreview)
+
     super.activate()
-
-    backButton = new GrayButton("Back", () => MainApplication.transition(new MainMenuScreen))
-    backButton.setPercentBounds(0.8, 0.8, 0.14, 0.07)
-    panel.add(backButton)
-
-    trackPreview = new TrackPreviewPanel
-    trackPreview.setPercentBounds(0.55, 0.05, 0.4, 0.7)
-    panel.add(trackPreview)
-
-    //testTBox = new TextArea("Insert text here")
-    //testTBox.setPercentBounds(0.2, 0.4, 0.28, 0.28)
-    //panel.add(testTBox)
-
-    testImageArray = new ImageDisplayArea(Vector(new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)))
-    testImageArray.setPercentBounds(0.2, 0.4, 0.28, 0.28)
-    panel.add(testImageArray)
-
-    testDropdown = new DropDown(Settings.resolutions.map(v => s"${v.x.toInt} x ${v.y.toInt}"))
-    testDropdown.setPercentBounds(0.2, 0.15, 0.14, 0.07)
-    panel.add(testDropdown)
-
-
-
-
-
-
-    redraw()
   }
 
-  override def redraw() = {
-    backButton.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
-    trackPreview.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
-    //testTBox.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
-    testDropdown.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
-    testImageArray.updateBounds(MainApplication.windowWidth, MainApplication.windowHeight)
-    super.redraw()
-  }
+  protected override def createComponents(): Unit = {
 
+    val screenTitle = new FontLabel("Select a track", fontSize = 2F)
+    screenTitle.percentSize = (GUIConstants.TEXTFIELD_WIDTH*2, GUIConstants.TEXTFIELD_HEIGHT*1.5)
+    screenTitle.percentPosition = (0.05, 0.025)
+    components += screenTitle
+
+    val backButton = new GrayButton("Back", () => MainApplication.transition(new MainMenuScreen))
+    backButton.percentPosition = (0.8, 0.8)
+    components += backButton
+
+    val trackPreview = new TrackPreviewPanel
+    trackPreview.percentBounds = (0.55, 0.05, 0.4, 0.7)
+    components += trackPreview
+
+    val trackImages = new ImageDisplayArea(trackPreviews.map(_.previewImage), index => {
+      trackPreview.updatePreview(trackPreviews(index))
+    })
+    trackImages.percentBounds = (0.025, 0.13, 0.5, 0.6)
+    components += trackImages
+  }
 
 }

@@ -4,8 +4,8 @@ import formula.io._
   case class V2D(x: Double, y: Double) {
     private def rnd(d: Double) = V2D.rnd(d)
 
-    def +(v: V2D)              = V2D(x+v.x, y+v.y)
-    def -(v: V2D)              = V2D(x-v.x, y-v.y)
+    def +(v: V2D)              = V2D(x + v.x, y + v.y)
+    def -(v: V2D)              = V2D(x - v.x, y - v.y)
     def *(m: Double)           = V2D(m * x, m * y)
     def /(m: Double)           = V2D(x / m, y / m)
     def unary_-                = V2D(-x, -y)
@@ -31,7 +31,7 @@ import formula.io._
 
     def changeBasis(origin: V2D, xDir: V2D, yDir: V2D) = V2D.changeBasis(this, origin, xDir, yDir)
 
-    override def toString()    = s"($x, $y)"
+    override def toString      = s"($x, $y)"
   }
 
   object V2D extends Serializable[V2D] {
@@ -44,8 +44,8 @@ import formula.io._
     def apply(dim: java.awt.Dimension): V2D = V2D(dim.getWidth, dim.getHeight)
     def apply(p: java.awt.Point): V2D       = V2D(p.getX, p.getY)
 
-    implicit def toPoint(v: V2D)            = new java.awt.Point(rnd(v.x), rnd(v.y))
     implicit def toDim(v: V2D)              = new java.awt.Dimension(rnd(v.x), rnd(v.y))
+    implicit def toPoint(v: V2D)            = new java.awt.Point(rnd(v.x), rnd(v.y))
 
     def dot(a: V2D, b: V2D)                 = a.x * b.x + a.y * b.y
     def dist(a: V2D, b: V2D)                = (a - b).length
@@ -75,9 +75,8 @@ import formula.io._
     }
 
     override def save(saveable: V2D): Array[Byte] = FormulaIO.saveDouble(saveable.x) ++ FormulaIO.saveDouble(saveable.y)
-    override def load(bytes: Array[Byte], start: Int, count: Int): V2D = V2D(FormulaIO.loadDouble(bytes, start), FormulaIO.loadDouble(bytes, start+8))
+    override def load(bytes: Array[Byte], start: Int): V2D = V2D(FormulaIO.loadDouble(bytes, start), FormulaIO.loadDouble(bytes, start+8))
 
 
   }
-
 }

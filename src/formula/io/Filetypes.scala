@@ -1,13 +1,17 @@
 package formula.io
 import formula.engine.V2D
 
+import java.awt.event.KeyEvent
+
 trait Serializable[T] {
   def save(saveable: T): Array[Byte]
-  def load(bytes: Array[Byte], start: Int, count: Int): T
-  def load(bytes: Array[Byte]): T = load(bytes, 0, bytes.size)
+  def load(bytes: Array[Byte], start: Int): T
+  def load(bytes: Array[Byte]): T = load(bytes, 0)
 }
 
-case class Settings(screenSize: V2D, fullScreen: Boolean)
+case class Settings(resolution: Int, fullScreen: Boolean, player1Controls: Array[Int], player2Controls: Array[Int]) {
+  def screenSize = Settings.resolutions(resolution)
+}
 
 object Settings extends Serializable[Settings] {
 
@@ -20,21 +24,85 @@ object Settings extends Serializable[Settings] {
     V2D(1920, 1080)
   )
 
-  def defaultSettings = Settings(resolutions(0), false)
-  override def save(saveable: Settings) = {
-    val resBytes = FormulaIO.saveDouble(saveable.screenSize.x) ++ FormulaIO.saveDouble(saveable.screenSize.y)
-    Array[Byte](if(saveable.fullScreen) 1 else 0) ++ resBytes
+  def keyName(keyCode: Int) = {
+
+    keyCode match {
+      case KeyEvent.VK_0 => "0"
+      case KeyEvent.VK_1 => "1"
+      case KeyEvent.VK_2 => "2"
+      case KeyEvent.VK_3 => "3"
+      case KeyEvent.VK_4 => "4"
+      case KeyEvent.VK_5 => "5"
+      case KeyEvent.VK_6 => "6"
+      case KeyEvent.VK_7 => "7"
+      case KeyEvent.VK_8 => "8"
+      case KeyEvent.VK_9 => "9"
+      case KeyEvent.VK_A => "A"
+      case KeyEvent.VK_B => "B"
+      case KeyEvent.VK_C => "C"
+      case KeyEvent.VK_D => "D"
+      case KeyEvent.VK_E => "E"
+      case KeyEvent.VK_F => "F"
+      case KeyEvent.VK_G => "G"
+      case KeyEvent.VK_H => "H"
+      case KeyEvent.VK_I => "I"
+      case KeyEvent.VK_J => "J"
+      case KeyEvent.VK_K => "K"
+      case KeyEvent.VK_L => "L"
+      case KeyEvent.VK_M => "M"
+      case KeyEvent.VK_N => "N"
+      case KeyEvent.VK_O => "O"
+      case KeyEvent.VK_P => "P"
+      case KeyEvent.VK_Q => "Q"
+      case KeyEvent.VK_R => "R"
+      case KeyEvent.VK_S => "S"
+      case KeyEvent.VK_T => "T"
+      case KeyEvent.VK_U => "U"
+      case KeyEvent.VK_V => "V"
+      case KeyEvent.VK_W => "W"
+      case KeyEvent.VK_X => "X"
+      case KeyEvent.VK_Y => "Y"
+      case KeyEvent.VK_Z => "Z"
+      case KeyEvent.VK_UP => "UP"
+      case KeyEvent.VK_DOWN => "DOWN"
+      case KeyEvent.VK_LEFT => "LEFT"
+      case KeyEvent.VK_RIGHT => "RIGHT"
+      case default => "K"+keyCode
+    }
   }
-  override def load(bytes: Array[Byte], start: Int, count: Int) = {
-    if(bytes.size < start + 17) {
+
+  val defaultPlayer1Controls = Array(KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_W, KeyEvent.VK_S)
+  val defaultPlayer2Controls = Array(KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_UP, KeyEvent.VK_DOWN)
+
+  def defaultSettings = Settings(0, false, defaultPlayer1Controls, defaultPlayer2Controls)
+  override def save(saveable: Settings) = {
+    Array[Byte](if(saveable.fullScreen) 1 else 0) ++
+    FormulaIO.saveInt(saveable.resolution) ++
+    saveable.player1Controls.flatMap(FormulaIO.saveInt(_)) ++
+    saveable.player2Controls.flatMap(FormulaIO.saveInt(_))
+  }
+  override def load(bytes: Array[Byte], start: Int) = {
+    if(bytes.length < start + 5 + defaultPlayer1Controls.length*4 + defaultPlayer2Controls.length*4) {
       defaultSettings
     }
 
     else {
       val fullScreen = bytes(start) == 1
-      val screenW = FormulaIO.loadDouble(bytes, 1)
-      val screenH = FormulaIO.loadDouble(bytes, 9)
-      Settings(V2D(screenW, screenH), fullScreen)
+      val resolution = FormulaIO.loadInt(bytes, 1)
+      var idx = 5
+      val player1Controls = Array.tabulate[Int](defaultPlayer1Controls.length)(i => {
+        val keycode = FormulaIO.loadInt(bytes, idx)
+        idx += 4
+        keycode
+      })
+
+      val player2Controls = Array.tabulate[Int](defaultPlayer2Controls.length)(i => {
+        val keycode = FormulaIO.loadInt(bytes, idx)
+        idx += 4
+        keycode
+      })
+
+      Settings(if(resolution<0 || resolution>resolutions.length-1) 0 else resolution, fullScreen, player1Controls, player2Controls)
     }
   }
 }

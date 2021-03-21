@@ -1,22 +1,14 @@
 package formula.application.screens
 
-import formula.application.{MainApplication, StaticScreen}
+import formula.application._
 import formula.io._
 
-class ResultScreen extends StaticScreen("screen0.png", Textures.Button) {
+class ResultScreen extends StaticScreen(Textures.Background_Generic, Textures.Button) {
+
+  protected override def createComponents() = {
 
 
 
-  override def activate() = {
-    super.activate()
-
-
-
-    redraw()
   }
 
-  override def redraw() = {
-
-    super.redraw()
-  }
 }

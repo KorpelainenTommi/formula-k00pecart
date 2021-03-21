@@ -10,6 +10,9 @@ object Textures extends Resource {
   val Road = Value
   val Button = Value
 
+  val Background_Mainmenu = Value
+  val Background_Generic = Value
+
   val GAME_TEXTURES = Vector(Goal, Road)
 
   def path(t: Texture) = {
@@ -17,6 +20,8 @@ object Textures extends Resource {
       case Button => "Button0.png"
       case Goal => "Goal0.png"
       case Road => "Road0.png"
+      case Background_Mainmenu => "background0.png"
+      case Background_Generic  => "screen0.png"
     }
   }
 }

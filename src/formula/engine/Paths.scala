@@ -4,9 +4,9 @@ import formula.io._
 object ClosedPath extends Serializable[ClosedPath] {
 
   override def save(saveable: ClosedPath): Array[Byte] = FormulaIO.saveInt(saveable.length) ++ saveable._points.flatMap(V2D.save)
-  override def load(bytes: Array[Byte], start: Int, count: Int): ClosedPath = {
+  override def load(bytes: Array[Byte], start: Int): ClosedPath = {
     val len = FormulaIO.loadInt(bytes, start)
-    new ClosedPath(Array.tabulate(len)(i => V2D.load(bytes, start+4+i*8, 8)))
+    new ClosedPath(Array.tabulate(len)(i => V2D.load(bytes, start+4+i*8)))
   }
 
   def apply(points: V2D*) = new ClosedPath(points)

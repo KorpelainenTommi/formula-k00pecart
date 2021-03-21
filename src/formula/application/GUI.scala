@@ -4,7 +4,6 @@ import java.awt.{Graphics, Color}
 import java.awt.image.BufferedImage
 import java.awt.event._
 package formula.application {
-  import java.awt.Component
 
 
   trait TextureLoader {
@@ -15,11 +14,11 @@ package formula.application {
   }
 
   trait BackgroundPanel {
-    protected def backgroundName: String
+    protected def background: formula.io.Textures.Texture
     protected def additionalPaint(g: Graphics) = {}
     protected def loadBackground() = {
       try {
-        backgroundImage = Some(FormulaIO.loadImage(backgroundName))
+        backgroundImage = Some(FormulaIO.loadImage(formula.io.Textures.path(background)))
       }
       catch {
         case e: FormulaIO.ResourceLoadException => MainApplication.messageBox(e.getMessage)
@@ -42,11 +41,24 @@ package formula.application {
     protected var pW: Double = 0
     protected var pH: Double = 0
 
-    def setPercentBounds(x: Double, y: Double, w: Double, h: Double) = {
-      pX = x
-      pY = y
-      pW = w
-      pH = h
+    def percentPosition = (pX, pY)
+    def percentPosition_=(value: (Double, Double)) = {
+      pX = value._1
+      pY = value._2
+    }
+
+    def percentSize = (pW, pH)
+    def percentSize_=(value: (Double, Double)) = {
+      pW = value._1
+      pH = value._2
+    }
+
+    def percentBounds = (pX, pY, pW, pH)
+    def percentBounds_=(value: (Double, Double, Double, Double)) = {
+      pX = value._1
+      pY = value._2
+      pW = value._3
+      pH = value._4
     }
 
     def updateBounds(width: Double, height: Double)
@@ -64,22 +76,26 @@ package formula.application {
     protected def fontSize: Float
     override def updateBounds(width: Double, height: Double) = {
       super.updateBounds(width, height)
-      component.setFont(FormulaIO.getFont(textFont).deriveFont((fontSize * width * 0.018).toFloat))
+      component.setFont(FormulaIO.getFont(textFont).deriveFont((fontSize * width * GUIConstants.FONT_SIZE).toFloat))
     }
   }
 
   class FontLabel
   (txt: String,
-  val textFont: Fonts.Font = Fonts.Impact,
+  val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT,
   val fontSize: Float = 1F,
-  val fontColor: Color = Color.DARK_GRAY)
+  val fontColor: Color = GUIConstants.COLOR_FONT)
   extends JLabel(txt) with TextPercentBounds {
 
     override def component = this
     this.setForeground(fontColor)
     def text = this.getText
     def text_=(value: String) = this.setText(value)
+  }
 
+  class CheckBox extends JCheckBox with ComponentPercentBounds {
+    override def component = this
+    this.setOpaque(false)
   }
 
   class GrayButton
@@ -99,48 +115,52 @@ package formula.application {
 
     override def updateBounds(width: Double, height: Double) = {
       super.updateBounds(width, height)
-      this.setFont(FormulaIO.getFont(Fonts.Impact).deriveFont((width * 0.018).toFloat))
+      this.setFont(FormulaIO.getFont(GUIConstants.DEFAULT_FONT).deriveFont((width * GUIConstants.FONT_SIZE).toFloat))
     }
 
     this.setBorderPainted(false)
     this.setFocusPainted(false)
     this.setContentAreaFilled(false)
-    this.setBackground(new Color(0, 0, 0, 0))
+    this.setBackground(GUIConstants.COLOR_BLANK)
 
     private val button = this
     this.addMouseListener(new MouseAdapter() {
       override def mouseEntered(e: MouseEvent) = {
-        button.setBackground(new Color(100, 105, 150, 100))
+        button.setBackground(GUIConstants.COLOR_BUTTON_HOVER)
       }
       override def mouseExited(e: MouseEvent) = {
-        button.setBackground(new Color(0, 0, 0, 0))
+        button.setBackground(GUIConstants.COLOR_BLANK)
       }
       override def mousePressed(e: MouseEvent) = {
-        button.setBackground(new Color(120, 125, 155, 150))
+        button.setBackground(GUIConstants.COLOR_BUTTON_PRESSED)
         onclick()
       }
       override def mouseReleased(e: MouseEvent) = {
-        button.setBackground(new Color(0, 0, 0, 0))
+        button.setBackground(GUIConstants.COLOR_BLANK)
       }
     })
+
+    this.percentSize = (GUIConstants.BUTTON_WIDTH, GUIConstants.BUTTON_HEIGHT)
   }
 
   class TextInput
   (txt: String,
-  val textFont: Fonts.Font = Fonts.Impact,
-  val color: Color = Color.DARK_GRAY)
+  val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT,
+  val color: Color = GUIConstants.COLOR_FONT)
   extends JTextField(1) with TextPercentBounds {
 
     override protected def fontSize = 1F
     override def component = this
     this.setForeground(color)
     this.setText(txt)
+
+    this.percentSize = (GUIConstants.TEXTFIELD_WIDTH, GUIConstants.TEXTFIELD_HEIGHT)
   }
 
   class TextArea
   (txt: String,
-  val textFont: Fonts.Font = Fonts.Impact,
-  val color: Color = Color.DARK_GRAY,
+  val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT,
+  val color: Color = GUIConstants.COLOR_FONT,
   protected val textArea: JTextArea = new JTextArea)
   extends JScrollPane(textArea) with ComponentPercentBounds {
 
@@ -151,49 +171,68 @@ package formula.application {
     textArea.setText(txt)
 
     this.getVerticalScrollBar.setUI(new javax.swing.plaf.basic.BasicScrollBarUI(){
-      override protected def configureScrollBarColors() = this.thumbColor = new Color(163, 184, 204, 255)
+      override protected def configureScrollBarColors() = this.thumbColor = GUIConstants.COLOR_SCROLLBAR
     })
 
     this.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
 
     override def updateBounds(width: Double, height: Double) = {
       super.updateBounds(width, height)
-      textArea.setFont(FormulaIO.getFont(textFont).deriveFont((fontSize * width * 0.018).toFloat))
+      textArea.setFont(FormulaIO.getFont(textFont).deriveFont((fontSize * width * GUIConstants.FONT_SIZE).toFloat))
     }
   }
 
   class DropDown
   (options: Seq[String],
-  val textFont: Fonts.Font = Fonts.Impact)
+  val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT)
   extends JComboBox[String](options.toArray) with TextPercentBounds {
 
     override def component = this
     protected val fontSize = 1F
 
+    this.percentSize = (GUIConstants.BUTTON_WIDTH, GUIConstants.BUTTON_HEIGHT)
+
   }
 
   class ImageDisplayArea
-  (entries: Seq[BufferedImage],
+  (entries: Seq[BufferedImage], onSelect: Int => Unit = (_ => {}),
   protected val imageList: JList[ImageIcon] = new JList[ImageIcon]())
   extends JScrollPane(imageList) with ComponentPercentBounds {
 
     override def component = this
-    private val icons = entries.map(new ImageIcon(_)).toArray
-    imageList.setListData(icons)
 
-    imageList.setCellRenderer(new DefaultListCellRenderer {
-      override def getListCellRendererComponent(list: JList[_], value: Any, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component = {
-        val label = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus).asInstanceOf[JLabel]
-        label.setIcon(value.asInstanceOf[ImageIcon])
-        label
-      }
-    })
+    imageList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
+    imageList.setLayoutOrientation(JList.HORIZONTAL_WRAP)
+    imageList.setVisibleRowCount(-1)
+    imageList.setBackground(GUIConstants.COLOR_AREA)
+
+    imageList.addListSelectionListener(e => if (!e.getValueIsAdjusting) onSelect(imageList.getSelectedIndex))
 
     this.getVerticalScrollBar.setUI(new javax.swing.plaf.basic.BasicScrollBarUI(){
-      override protected def configureScrollBarColors() = this.thumbColor = new Color(163, 184, 204, 255)
+      override protected def configureScrollBarColors() = this.thumbColor = GUIConstants.COLOR_SCROLLBAR
     })
 
     this.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
+    this.getVerticalScrollBar.setUnitIncrement(10)
+
+    override def updateBounds(width: Double, height: Double) = {
+      super.updateBounds(width, height)
+      val w = (pW*width*GUIConstants.IMAGE_CELL_WIDTH).toInt
+      imageList.setFixedCellWidth(w)
+      imageList.setFixedCellHeight(w)
+
+      imageList.setListData(entries.map(img => {
+        val iconImage = new BufferedImage(w, w, BufferedImage.TYPE_INT_ARGB)
+        val g = iconImage.createGraphics()
+        val margin = GUIConstants.IMAGE_CELL_MARGIN
+        val border = GUIConstants.IMAGE_CELL_BORDER
+        g.setColor(GUIConstants.COLOR_CELL_BORDER)
+        g.fillRect(border, border, w-2*border, w-2*border)
+        g.drawImage(img, margin, margin,w-2*margin,w-2*margin, null)
+        g.dispose()
+        new ImageIcon(iconImage)
+      }).toArray)
+    }
   }
 
 

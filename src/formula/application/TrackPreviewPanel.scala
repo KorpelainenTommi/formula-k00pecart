@@ -1,34 +1,51 @@
 package formula.application
 import javax.swing._
-import formula.engine.TrackPreview
+import formula.engine.{Track, TrackPreview}
 import java.awt.Graphics
+import java.awt.image.BufferedImage
 class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
   this.setLayout(null)
   override def component = this
 
   override def paintComponent(g: Graphics) = {
-    val bounds = g.getClipBounds
-    g.setColor(java.awt.Color.DARK_GRAY)
-    g.fillRect((bounds.x+0.4*bounds.width).toInt, (bounds.y+0.3*bounds.height).toInt, (0.55*bounds.width).toInt, (0.01*bounds.height).toInt)
-    g.setColor(java.awt.Color.GREEN)
-    g.fillRect((bounds.x+0.05*bounds.width).toInt, (bounds.y+0.05*bounds.height).toInt, (0.28*bounds.width).toInt, (0.28*bounds.width).toInt)
+    super.paintComponent(g)
+    if(previewImage.isDefined) {
+      val bounds = g.getClipBounds
+      g.setColor(java.awt.Color.DARK_GRAY)
+      g.fillRect((bounds.x+0.4*bounds.width).toInt, (bounds.y+0.3*bounds.height).toInt, (0.55*bounds.width).toInt, (0.01*bounds.height).toInt)
+
+      val iconX = (bounds.x+0.05*bounds.width).toInt
+      val iconY = (bounds.y+0.05*bounds.height).toInt
+      val iconW = (0.28*bounds.width).toInt
+      val iconH = (0.28*bounds.width).toInt
+      val border = GUIConstants.IMAGE_CELL_MARGIN-GUIConstants.IMAGE_CELL_BORDER
+      g.setColor(GUIConstants.COLOR_CELL_BORDER)
+      g.fillRect(iconX, iconY, iconW, iconH)
+      previewImage.foreach(img => {
+        g.drawImage(img, iconX+border, iconY+border, iconW-2*border, iconH-2*border, null)
+      })
+    }
+    //g.fillRect((bounds.x+0.05*bounds.width).toInt, (bounds.y+0.05*bounds.height).toInt, (0.28*bounds.width).toInt, (0.28*bounds.width).toInt)
   }
 
-  private val trackLabel = new FontLabel("Track: Loop1", fontSize = 3F)
-  trackLabel.setPercentBounds(0.4, 0.05, 0.5, 0.1)
+  this.setBackground(GUIConstants.COLOR_AREA)
+
+  private var previewImage: Option[BufferedImage] = None
+  private val trackLabel = new FontLabel("", fontSize = 3F)
+  trackLabel.percentBounds = (0.4, 0.05, 0.5, 0.1)
   this.add(trackLabel)
 
-  private val creatorLabel = new FontLabel("Creator: K00PE", fontSize = 3F)
-  creatorLabel.setPercentBounds(0.4, 0.15, 0.5, 0.1)
+  private val creatorLabel = new FontLabel("", fontSize = 3F)
+  creatorLabel.percentBounds = (0.4, 0.15, 0.5, 0.1)
   this.add(creatorLabel)
 
-  private val leaderBoardsLabel = new FontLabel("L E A D E R B O A R D S", fontSize = 3F)
-  leaderBoardsLabel.setPercentBounds(0.4, 0.32, 0.5, 0.1)
+  private val leaderBoardsLabel = new FontLabel("", fontSize = 3F)
+  leaderBoardsLabel.percentBounds = (0.4, 0.32, 0.5, 0.1)
   this.add(leaderBoardsLabel)
 
   private val leaderBoards = Array.tabulate[FontLabel](formula.engine.Track.MAX_LEADERBOARD)(i => {
-    val l = new FontLabel("1. 9:59:59.00 Exampletime"+i, formula.io.Fonts.TimesNewRoman, fontSize = 3F, java.awt.Color.YELLOW)
-    l.setPercentBounds(0.05, 0.42+i*0.09, 0.9, 0.1)
+    val l = new FontLabel("", formula.io.Fonts.TimesNewRoman, fontSize = 3F, java.awt.Color.YELLOW)
+    l.percentBounds = (0.05, 0.42+i*0.09, 0.9, 0.1)
     l
   })
   leaderBoards.foreach(this.add)
@@ -43,12 +60,19 @@ class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
     leaderBoards.foreach(_.updateBounds(getBounds().width, getBounds().height))
   }
 
-  private var _trackPreview: TrackPreview = null
-  def trackPreview = _trackPreview
-
   def updatePreview(track: TrackPreview) = {
 
+    trackLabel.text = "Track: " + track.trackName
+    creatorLabel.text = "Creator: " + track.creator
+    leaderBoardsLabel.text = "L E A D E R B O A R D S"
+    leaderBoards.foreach(_.text = "")
+    for(i <- track.fastestTimes.indices) {
+      val n = i+1
+      leaderBoards(i).text = s"$n. "+Track.describeTrackTime(track.fastestTimes(i))
+    }
 
+    previewImage = Some(track.previewImage)
+    this.repaint()
 
   }
 

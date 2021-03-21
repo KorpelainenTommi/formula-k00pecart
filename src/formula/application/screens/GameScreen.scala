@@ -1,9 +1,10 @@
 package formula.application.screens
-
 import formula.application.{MainApplication, RenderPanel, Screen, TextureLoader}
 import formula.engine._
 import formula.io._
+
 class GameScreen extends Screen with TextureLoader {
+
   override protected def textures = Textures.GAME_TEXTURES
 
   val mainRenderTarget: RenderTarget = null
@@ -14,7 +15,7 @@ class GameScreen extends Screen with TextureLoader {
     super.activate()
     loadTextures()
 
-    panel.setPercentBounds(1, 1, 1, 1)
+    panel.percentBounds = (0, 0, 1, 1)
     redraw()
   }
 

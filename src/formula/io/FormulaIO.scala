@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage
 import scala.collection.mutable.HashMap
 import Textures.Texture
 import Fonts.Font
-import formula.engine.TrackPreview
+import formula.engine.{Track, TrackPreview}
 import formula.application.MainApplication
 
 object FormulaIO {
@@ -22,7 +22,15 @@ object FormulaIO {
 
   val loadedTextures = HashMap[Texture, BufferedImage]()
   val loadedFonts = HashMap[Font, java.awt.Font]()
-  val missingTexture = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+
+  val missingTexture = {
+    val img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
+    val g = img.createGraphics()
+    g.setColor(java.awt.Color.MAGENTA)
+    g.fillRect(0,0,1,1)
+    g.dispose()
+    img
+  }
   val defaultFont = new javax.swing.JLabel().getFont
 
 
@@ -41,7 +49,7 @@ object FormulaIO {
   def saveString(s: String) = (s.filter(_ != STRING_SEP_CHAR) + STRING_SEP_CHAR).getBytes(ENCODING)
   def loadString(buf: Array[Byte], offset: Int) = {
     var idx = offset
-    while(idx+1 < buf.size && (buf(idx) != STRING_SEP_BYTES(0) || buf(idx+1) != STRING_SEP_BYTES(1))) {
+    while(idx+1 < buf.length && (buf(idx) != STRING_SEP_BYTES(0) || buf(idx+1) != STRING_SEP_BYTES(1))) {
       idx += 2
     }
     (bytesToChar(buf.slice(offset, idx)).mkString, (idx-offset) + 2)
@@ -62,7 +70,7 @@ object FormulaIO {
 
   def bytesToChar(bytes: Array[Byte]) = {
     //Since a char is 2 bytes wide, we want an even number of bytes
-    val data: Array[Byte] = if(bytes.size % 2 == 0) bytes else bytes :+ 0
+    val data: Array[Byte] = if(bytes.length % 2 == 0) bytes else bytes :+ 0
     new String(data, ENCODING).toCharArray
   }
 
@@ -184,12 +192,12 @@ object FormulaIO {
     }
   }
 
-  def saveTrackPreview(track: TrackPreview) = {
+  def saveTrack(track: Track) = {
     var wtr: Option[BufferedWriter] = None
 
     try {
       wtr = Some(new BufferedWriter(new FileWriter(resolvePath("data", "tracks", (track.trackName+".trck")))))
-      wtr.get.write(bytesToChar(TrackPreview.save(track)))
+      wtr.get.write(bytesToChar(Track.save(track)))
       true
     }
 

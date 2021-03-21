@@ -1,13 +1,10 @@
 package formula.application
 
 import formula.application.screens.MainMenuScreen
-import formula.engine.TrackPreview
 import formula.io.FormulaIO
 import formula.io.Settings
 
 import java.awt.KeyboardFocusManager
-import java.awt.KeyEventDispatcher
-import java.awt.event.KeyEvent
 import java.awt.event.WindowEvent
 import javax.swing._
 
@@ -16,11 +13,11 @@ import javax.swing._
 object MainApplication extends App {
 
   //public members and functions
-  private var _currentScreen: Screen = null
+  private var _currentScreen: Option[Screen] = None
   def currentScreen = _currentScreen
   def transition(screen: Screen) = {
-    if(_currentScreen != null) _currentScreen.deactivate()
-    _currentScreen = screen
+    _currentScreen.foreach(_.deactivate())
+    _currentScreen = Some(screen)
     screen.activate()
   }
 
@@ -38,7 +35,8 @@ object MainApplication extends App {
   })
 
 
-  val topWindow = new JFrame("K00PECART", configuration)
+  val _topWindow = new JFrame("K00PECART", configuration)
+  def topWindow = _topWindow
 
   try {
     topWindow.setIconImage(FormulaIO.loadImage("icon0.png"))
@@ -69,7 +67,7 @@ object MainApplication extends App {
     topWindow.setExtendedState(topWindow.getExtendedState & ~java.awt.Frame.MAXIMIZED_BOTH)
     topWindow.setVisible(true)
     maximized = false
-    currentScreen.redraw()
+    currentScreen.foreach(_.redraw())
   }
 
   def maximize() = {
@@ -79,7 +77,7 @@ object MainApplication extends App {
     setState(java.awt.Frame.MAXIMIZED_BOTH)
     topWindow.setVisible(true)
     maximized = true
-    currentScreen.redraw()
+    currentScreen.foreach(_.redraw())
   }
 
   def close() = {
@@ -104,9 +102,6 @@ object MainApplication extends App {
   updateSettings(FormulaIO.loadSettings)
 
 
-
-
-
   def windowWidth  = if(maximized) configuration.getBounds.width else settings.screenSize.x
   def windowHeight = if(maximized) configuration.getBounds.height else settings.screenSize.y
 
@@ -115,15 +110,24 @@ object MainApplication extends App {
     JOptionPane.showMessageDialog(topWindow, message)
   }
 
+  def confirmBox(message: String) = {
+    JOptionPane.showConfirmDialog(topWindow, message, "Are you sure?", JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION
+  }
+
+  def modalActionBox(message: String, action: JDialog => Unit) = {
+    val pane = new JOptionPane()
+    pane.setMessageType(JOptionPane.INFORMATION_MESSAGE)
+    pane.setMessage(message)
+    val dialog = pane.createDialog(topWindow, "Input")
+    action(dialog)
+    dialog.setVisible(true)
+  }
+
   //Hook up keyEvents
-  KeyboardFocusManager.getCurrentKeyboardFocusManager.addKeyEventDispatcher(new KeyEventDispatcher {
-    override def dispatchKeyEvent(e: KeyEvent): Boolean = {
-      currentScreen.handleKey(e)
-      false
-    }
+  KeyboardFocusManager.getCurrentKeyboardFocusManager.addKeyEventDispatcher(e => {
+    currentScreen.foreach(_.handleKey(e))
+    false
   })
-
-
 
 
 
