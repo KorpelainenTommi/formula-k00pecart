@@ -23,7 +23,7 @@ class SubPanel(heightMultiplier: Double, protected val subpanel: JPanel = new JP
 
     override def updateBounds(width: Double, height: Double) = {
       super.updateBounds(width, height)
-      subpanel.setPreferredSize(new java.awt.Dimension((pW*width).toInt, (pH*height*heightMultiplier).toInt))
+      subpanel.setPreferredSize(new java.awt.Dimension(math.round(pW*width).toInt, math.round(pH*height*heightMultiplier).toInt))
       val w = pW*width
       val h = pH*height
       components.foreach(_.updateBounds(w, h))

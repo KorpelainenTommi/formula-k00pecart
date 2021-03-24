@@ -9,17 +9,21 @@ object Textures extends Resource {
   val Goal = Value
   val Road = Value
   val Button = Value
+  val Grass = Value
+  val Sky = Value
 
   val Background_Mainmenu = Value
   val Background_Generic = Value
 
-  val GAME_TEXTURES = Vector(Goal, Road)
+  val GAME_TEXTURES = Vector(Goal, Road, Grass, Sky)
 
   def path(t: Texture) = {
     t match {
-      case Button => "Button0.png"
-      case Goal => "Goal0.png"
-      case Road => "Road0.png"
+      case Button => "button0.png"
+      case Goal => "goal0.png"
+      case Road => "road0.png"
+      case Grass => "grass0.png"
+      case Sky => "sky0.png"
       case Background_Mainmenu => "background0.png"
       case Background_Generic  => "screen0.png"
     }

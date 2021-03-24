@@ -21,7 +21,7 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
     val subH = 0.8
 
     val subPanel = new SubPanel(1.5)
-    subPanel.percentBounds = (0.025, 0.05, subW, subH)
+    subPanel.percentBounds = (0.025, 0.1, subW, subH)
     components += subPanel
 
     //Subpanel components

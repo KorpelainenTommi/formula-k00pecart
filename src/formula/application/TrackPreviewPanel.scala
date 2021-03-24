@@ -12,12 +12,13 @@ class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
     if(previewImage.isDefined) {
       val bounds = g.getClipBounds
       g.setColor(java.awt.Color.DARK_GRAY)
-      g.fillRect((bounds.x+0.4*bounds.width).toInt, (bounds.y+0.3*bounds.height).toInt, (0.55*bounds.width).toInt, (0.01*bounds.height).toInt)
+      g.fillRect(math.round(bounds.x+0.4*bounds.width).toInt, math.round(bounds.y+0.3*bounds.height).toInt,
+        math.round(0.55*bounds.width).toInt, math.round(0.01*bounds.height).toInt)
 
-      val iconX = (bounds.x+0.05*bounds.width).toInt
-      val iconY = (bounds.y+0.05*bounds.height).toInt
-      val iconW = (0.28*bounds.width).toInt
-      val iconH = (0.28*bounds.width).toInt
+      val iconX = math.round(bounds.x+0.05*bounds.width).toInt
+      val iconY = math.round(bounds.y+0.05*bounds.height).toInt
+      val iconW = math.round(0.28*bounds.width).toInt
+      val iconH = math.round(0.28*bounds.width).toInt
       val border = GUIConstants.IMAGE_CELL_MARGIN-GUIConstants.IMAGE_CELL_BORDER
       g.setColor(GUIConstants.COLOR_CELL_BORDER)
       g.fillRect(iconX, iconY, iconW, iconH)

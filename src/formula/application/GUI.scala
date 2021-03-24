@@ -67,7 +67,7 @@ package formula.application {
   trait ComponentPercentBounds extends PercentBounds {
     def component: JComponent
     override def updateBounds(width: Double, height: Double) = {
-      component.setBounds((pX*width).toInt, (pY*height).toInt, (pW*width).toInt, (pH*height).toInt)
+      component.setBounds(math.round(pX*width).toInt, math.round(pY*height).toInt, math.round(pW*width).toInt, math.round(pH*height).toInt)
     }
   }
 
@@ -217,7 +217,7 @@ package formula.application {
 
     override def updateBounds(width: Double, height: Double) = {
       super.updateBounds(width, height)
-      val w = (pW*width*GUIConstants.IMAGE_CELL_WIDTH).toInt
+      val w = math.round(pW*width*GUIConstants.IMAGE_CELL_WIDTH).toInt
       imageList.setFixedCellWidth(w)
       imageList.setFixedCellHeight(w)
 

@@ -7,11 +7,11 @@ class MainMenuScreen extends StaticScreen(Textures.Background_Mainmenu, Textures
 
   protected override def createComponents() = {
 
-    val raceButton = new GrayButton("Race")
+    val raceButton = new GrayButton("Race", () => MainApplication.transition(new TrackSelectScreen(TrackSelectScreen.Race)))
     raceButton.percentPosition = (0.55, 0.05)
     components += raceButton
 
-    val trackToolButton = new GrayButton("Track tool", () => MainApplication.transition(new TrackSelectScreen))
+    val trackToolButton = new GrayButton("Track tool", () => MainApplication.transition(new TrackSelectScreen(TrackSelectScreen.TrackTool)))
     trackToolButton.percentPosition = (0.6, 0.15)
     components += trackToolButton
 
