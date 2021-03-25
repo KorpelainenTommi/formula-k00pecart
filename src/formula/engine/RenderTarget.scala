@@ -18,6 +18,7 @@ abstract class RenderTarget extends PercentBounds {
   }
 
   def render(g: Graphics2D): Unit = {
+    g.setClip(absoluteBounds)
     personalRender(g)
     subTargets.foreach(_.render(g))
   }

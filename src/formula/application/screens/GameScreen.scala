@@ -6,18 +6,18 @@ import formula.engine._
 import formula.io._
 
 
-class GameScreen(val track: Track) extends Screen with TextureLoader {
+class GameScreen(track: Track) extends Screen with TextureLoader {
 
   override protected def textures = Textures.GAME_TEXTURES
 
 
-  val game = new Game
+  val game = new Game(track)
 
   val mainRenderTarget = new BaseRenderTarget(() => game.gameUpdate())
   mainRenderTarget.percentBounds = (0, 0, 1, 1)
 
-  mainRenderTarget.addSubTarget(new GameRenderTarget(game))
-  mainRenderTarget.addSubTarget(new GameRenderTarget(game))
+  mainRenderTarget.addSubTarget(new GameRenderTarget(game, 0))
+  mainRenderTarget.addSubTarget(new GameRenderTarget(game, 1))
 
   val _panel = new RenderPanel(mainRenderTarget)
   override def panel = _panel
@@ -45,6 +45,31 @@ class GameScreen(val track: Track) extends Screen with TextureLoader {
 
     if(e.getID == KeyEvent.KEY_PRESSED && e.getKeyCode == KeyEvent.VK_ESCAPE) {
       MainApplication.transition(new MainMenuScreen)
+    }
+
+    if(e.getID == KeyEvent.KEY_PRESSED) {
+
+      val player1Key = MainApplication.settings.player1Controls.indexWhere(_ == e.getKeyCode)
+      val player2Key = MainApplication.settings.player2Controls.indexWhere(_ == e.getKeyCode)
+
+      if(player1Key != -1) {
+        game.input(0, player1Key, true)
+      }
+      if(player2Key != -1) {
+        game.input(1, player2Key, true)
+      }
+    }
+
+    if(e.getID == KeyEvent.KEY_RELEASED) {
+      val player1Key = MainApplication.settings.player1Controls.indexWhere(_ == e.getKeyCode)
+      val player2Key = MainApplication.settings.player2Controls.indexWhere(_ == e.getKeyCode)
+
+      if(player1Key != -1) {
+        game.input(0, player1Key, false)
+      }
+      if(player2Key != -1) {
+        game.input(1, player2Key, false)
+      }
     }
 
   }

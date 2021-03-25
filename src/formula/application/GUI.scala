@@ -201,6 +201,9 @@ package formula.application {
 
     override def component = this
 
+
+    def selectedIndex = imageList.getSelectedIndex
+
     imageList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
     imageList.setLayoutOrientation(JList.HORIZONTAL_WRAP)
     imageList.setVisibleRowCount(-1)

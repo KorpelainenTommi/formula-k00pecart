@@ -23,7 +23,7 @@ import formula.io._
     def ang(v: V2D)            = V2D.ang(this, v)
     def angDeg(v: V2D)         = V2D.angDeg(this, v)
 
-    def rot(d: Double)         = V2D(math.cos(d) * x - math.sin(d) * y, math.sin(d) * x + math.cos(d) * y)
+    def rot(d: Double)         = V2D(math.cos(d) * x - math.sin(d) * y, math.sin(d) * x + math.cos(d) * y) //positive is clockwise
     def rotDeg(d: Double)      = rot(math.Pi * d / 180.0)
 
     def lowerThan(v: V2D)      = V2D.lowerThan(this, v)

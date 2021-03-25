@@ -192,6 +192,24 @@ object FormulaIO {
     }
   }
 
+  def loadTrack(name: String) = {
+    var rdr: Option[BufferedReader] = None
+
+    try {
+      rdr = Some(new BufferedReader(new FileReader(resolvePath("data", "tracks", name))))
+      Some(Track.load(readAll(rdr.get)))
+    }
+
+    catch {
+      //Loading track preview failed
+      case _: FileNotFoundException | _: IOException => None
+    }
+
+    finally {
+      rdr.foreach(_.close())
+    }
+  }
+
   def saveTrack(track: Track) = {
     var wtr: Option[BufferedWriter] = None
 

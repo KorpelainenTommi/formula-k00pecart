@@ -7,7 +7,7 @@ class GrassRenderTarget extends RenderTarget {
 
   private var grassTexturePaint: Option[TexturePaint] = None
   private var distanceGradient: Option[GradientPaint] = None
-  private val startColor = new Color(0,69,19,200)
+  private val startColor = new Color(0,69,19,240)
   private val endColor   = new Color(0,0,0,0)
 
   override def updateBounds(width: Double, height: Double, xOffset: Int, yOffset: Int): Unit = {

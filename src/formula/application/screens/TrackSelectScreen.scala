@@ -36,6 +36,17 @@ class TrackSelectScreen(val purpose: TrackSelectScreen.Mode = TrackSelectScreen.
     backButton.percentPosition = (0.8, 0.85)
     components += backButton
 
+    val trackPreview = new TrackPreviewPanel
+    trackPreview.percentBounds = (0.55, 0.1, 0.4, 0.7)
+    components += trackPreview
+
+    val trackImages = new ImageDisplayArea(trackPreviews.map(_.previewImage), index => {
+      trackPreview.updatePreview(trackPreviews(index))
+    })
+    trackImages.percentBounds = (0.025, 0.15, 0.5, 0.6)
+    components += trackImages
+
+
     if(purpose == TrackSelectScreen.TrackTool) {
 
       val editButton = new GrayButton("Edit", () => {/*Transition to tracktool in edit mode*/})
@@ -51,24 +62,19 @@ class TrackSelectScreen(val purpose: TrackSelectScreen.Mode = TrackSelectScreen.
       val raceButton = new GrayButton("Select track", () => {
         //Transition to player naming
         //For now, directly go to gamescreen
-        MainApplication.transition(new GameScreen(null))
-
+        if(trackImages.selectedIndex != -1) {
+          val track = FormulaIO.loadTrack(trackfileNames(trackImages.selectedIndex))
+          if(track.isEmpty) MainApplication.messageBox("Error loading selected track")
+          else MainApplication.transition(new GameScreen(track.get))
+        }
+        else {
+          MainApplication.messageBox("Select a track first")
+        }
       })
       raceButton.percentPosition = (0.05, 0.85)
       components += raceButton
     }
 
-
-
-    val trackPreview = new TrackPreviewPanel
-    trackPreview.percentBounds = (0.55, 0.1, 0.4, 0.7)
-    components += trackPreview
-
-    val trackImages = new ImageDisplayArea(trackPreviews.map(_.previewImage), index => {
-      trackPreview.updatePreview(trackPreviews(index))
-    })
-    trackImages.percentBounds = (0.025, 0.15, 0.5, 0.6)
-    components += trackImages
   }
 
 }
