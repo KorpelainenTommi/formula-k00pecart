@@ -135,6 +135,7 @@ object Track extends Serializable[Track] {
 class Track(trackName: String, description: String = "", creator: String = "Unknown", version: Byte = 0) extends TrackPreview(trackName, description, creator, version) {
 
   //Debug
+  //TODO: Make _road back to private
   var _road = BitSet()
   def road(point: V2D): Boolean = {
     road(math.round(point.x).toInt, math.round(point.y).toInt)

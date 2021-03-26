@@ -15,9 +15,26 @@ class Player(val game: Game, initialPosition: V2D, initialDirection: V2D, val pl
 
   private val carTextures = if(playerNumber == 0) Textures.CAR_RED_TEXTURES else Textures.CAR_BLUE_TEXTURES
 
-  protected var gear = 0
+  protected var _turnMult = 0D
+  protected var _gear = 0
   protected var _position = initialPosition
   protected var _direction = initialDirection
+
+  def gear = _gear
+  def turnMult = _turnMult
+
+  protected def gear_=(value: Int) = {
+    _gear = value
+    _turnMult = calculateTurnMult
+  }
+
+
+
+  protected def calculateTurnMult: Double = {
+    if(gear == 0) 0D
+    else if(gear <= 1) 0.5 * Player.MAX_GEAR
+    else 0.5 * (1 + Player.MAX_GEAR - gear)
+  }
 
   def turnLeft = game.input(playerNumber, 0)
   def turnRight = game.input(playerNumber, 1)
@@ -90,11 +107,11 @@ class Player(val game: Game, initialPosition: V2D, initialDirection: V2D, val pl
     }
 
     if(turnLeft) {
-      _direction = _direction.rotDeg(-Player.TURN_RATE * deltaT).normalized
+      _direction = _direction.rotDeg(-(Player.TURN_RATE * turnMult) * deltaT).normalized
     }
 
     if(turnRight) {
-      _direction = _direction.rotDeg(Player.TURN_RATE * deltaT).normalized
+      _direction = _direction.rotDeg(turnMult * Player.TURN_RATE * deltaT).normalized
     }
 
     val velocity = direction * Player.BASE_SPEED * deltaT * gear

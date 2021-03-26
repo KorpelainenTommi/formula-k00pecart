@@ -17,6 +17,10 @@ class MapRenderTarget(private val game: Game) extends RenderTarget {
   debugCamera2.percentBounds = (0,0,1,1)
   subTargets += debugCamera2
 
+  val debugPath = new PathDebugRenderTarget(Color.MAGENTA)
+  debugPath.percentBounds = (0,0,1,1)
+  subTargets += debugPath
+
 
   override def updateBounds(width: Double, height: Double, xOffset: Int, yOffset: Int): Unit = {
     super.updateBounds(width, height, xOffset, yOffset)

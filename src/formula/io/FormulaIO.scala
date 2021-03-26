@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage
 import scala.collection.mutable.HashMap
 import Textures.Texture
 import Fonts.Font
-import formula.engine.{Track, TrackPreview}
+import formula.engine._
 import formula.application.MainApplication
 
 object FormulaIO {
@@ -257,6 +257,75 @@ object FormulaIO {
       if(buffer(i*4) == 0x0) bitSet.add(i)
     }
     bitSet
+  }
+
+  def loadDemoPath(name: String) = {
+    val demoimg = FormulaIO.loadImage(name)
+    val raster = demoimg.getRaster
+    val buffer = raster.getDataElements(0, 0, 256, 256, null).asInstanceOf[Array[Byte]]
+
+    val redDots = scala.collection.mutable.ArrayBuffer[V2D]()
+    val blueDots = scala.collection.mutable.ArrayBuffer[V2D]()
+    val greenDots = scala.collection.mutable.ArrayBuffer[V2D]()
+    var whiteDot = formula.engine.V2D(0,0)
+
+    val FULL_BITS: Byte = -1
+    val EMPTY_BITS: Byte = 0
+
+    var r: Byte = 0
+    var g: Byte = 0
+    var b: Byte = 0
+
+    for(i <- 0 until (256*256)) {
+      r = buffer(i*4)
+      g = buffer(i*4+1)
+      b = buffer(i*4+2)
+
+      if(r == FULL_BITS && g == FULL_BITS && b == FULL_BITS) {
+        whiteDot = V2D(i % Track.TRACK_WIDTH, i / Track.TRACK_HEIGHT)
+      }
+
+      else if(r == FULL_BITS) {
+        redDots += V2D(i % Track.TRACK_WIDTH, i / Track.TRACK_HEIGHT)
+      }
+
+      else if(g == FULL_BITS) {
+        greenDots += V2D(i % Track.TRACK_WIDTH, i / Track.TRACK_HEIGHT)
+      }
+
+      else if(b == FULL_BITS) {
+        blueDots += V2D(i % Track.TRACK_WIDTH, i / Track.TRACK_HEIGHT)
+      }
+    }
+
+    def locate(point: V2D, points: scala.collection.mutable.ArrayBuffer[V2D]) = {
+    var closest, i = 0
+    var sqrD, dist = Double.PositiveInfinity
+    while(i < points.length) {
+      sqrD = point distSqr points(i)
+      if(sqrD < dist) {
+        dist = sqrD
+        closest = i
+      }
+      i += 1
+    }
+    points(closest)
+  }
+
+    val points = Array.ofDim[formula.engine.V2D](redDots.length*3+1)
+    points(0) = whiteDot
+    var lastPoint = whiteDot
+    for(i <- redDots.indices) {
+      points(i*3+1) = locate(lastPoint, redDots)
+      lastPoint = points(i*3+1)
+      points(i*3+2) = locate(lastPoint, greenDots)
+      lastPoint = points(i*3+2)
+      points(i*3+3) = locate(lastPoint, blueDots)
+      lastPoint = points(i*3+3)
+    }
+
+    new ClosedLoop(points)
+
   }
 
 

@@ -5,10 +5,16 @@ import formula.io._
 import java.awt._
 class GameRenderTarget(val game: Game, playerNumber: Int) extends RenderTarget {
 
+  private val playerCamera = game.player(playerNumber).camera
+
   private val grass = new GrassRenderTarget
-  grass.percentPosition = (0, 0.25)
-  grass.percentSize = (1, 0.75)
+  grass.percentPosition = (0, 0.32)
+  grass.percentSize = (1, 0.68)
   subTargets += grass
+
+  private val road = new RoadRenderTarget(playerCamera)
+  road.percentBounds = (0, 0, 1, 1)
+  subTargets += road
 
   val sky = new SkyRenderTarget
   sky.percentSize = (1, 0.33)
@@ -19,7 +25,6 @@ class GameRenderTarget(val game: Game, playerNumber: Int) extends RenderTarget {
   map.percentSize = (0.18, 0.18)
   subTargets += map
 
-  private val playerCamera = game.player(playerNumber).camera
 
   val playerRenderTarget = new PlayerRenderTarget(game.players, playerCamera)
   playerRenderTarget.percentBounds = (0, 0, 1, 1)

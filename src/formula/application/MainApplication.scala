@@ -102,8 +102,8 @@ object MainApplication extends App {
   updateSettings(FormulaIO.loadSettings)
 
 
-  def windowWidth  = if(maximized) configuration.getBounds.width else topWindow.getContentPane.getWidth()
-  def windowHeight = if(maximized) configuration.getBounds.height else topWindow.getContentPane.getHeight()
+  def windowWidth  = if(maximized) configuration.getBounds.width else topWindow.getContentPane.getWidth
+  def windowHeight = if(maximized) configuration.getBounds.height else topWindow.getContentPane.getHeight
 
 
   def messageBox(message: String) = {
@@ -128,6 +128,7 @@ object MainApplication extends App {
     currentScreen.foreach(_.handleKey(e))
     false
   })
+
 
 
 

@@ -13,7 +13,7 @@ class GrassRenderTarget extends RenderTarget {
   override def updateBounds(width: Double, height: Double, xOffset: Int, yOffset: Int): Unit = {
 
     super.updateBounds(width, height, xOffset, yOffset)
-    grassTexturePaint = Some(new TexturePaint(FormulaIO.getTexture(Textures.Grass), new Rectangle(0, 0, absoluteBounds.width, absoluteBounds.height)))
+    grassTexturePaint = Some(new TexturePaint(FormulaIO.getTexture(Textures.Grass), new Rectangle(0, 0, absoluteBounds.width/2, absoluteBounds.height/2)))
     distanceGradient = Some(new GradientPaint(absoluteBounds.x, absoluteBounds.y, startColor, absoluteBounds.x, absoluteBounds.y+absoluteBounds.height, endColor))
   }
 
