@@ -16,8 +16,8 @@ class CameraDebugRenderTarget(camera: Camera, lineColor: Color) extends RenderTa
     val camStartL = translatePos(camera.position - camera.scanPerpendicular * (Camera.MIN_SCAN_WIDTH/2))
     val camStartR = translatePos(camera.position + camera.scanPerpendicular * (Camera.MIN_SCAN_WIDTH/2))
 
-    val camEndL = translatePos(camera.position + camera.scanVector * Camera.CAMERA_VANISH_LINEAR - camera.scanPerpendicular * (Camera.lerp(Camera.CAMERA_VANISH_LINEAR)/2))
-    val camEndR = translatePos(camera.position + camera.scanVector * Camera.CAMERA_VANISH_LINEAR + camera.scanPerpendicular * (Camera.lerp(Camera.CAMERA_VANISH_LINEAR)/2))
+    val camEndL = translatePos(camera.position + camera.scanVector - camera.scanPerpendicular * (Camera.MAX_SCAN_WIDTH/2))
+    val camEndR = translatePos(camera.position + camera.scanVector + camera.scanPerpendicular * (Camera.MAX_SCAN_WIDTH/2))
 
     g.setStroke(new BasicStroke(2))
     g.setColor(lineColor)

@@ -7,7 +7,7 @@ object Player {
   val TURN_RATE = 50D
   val MAX_GEAR = 5
   val GEAR_SHIFT_COOLDOWN = 0.5 //seconds
-  val CAMERA_DISTANCE = 6D
+  val CAMERA_DISTANCE = 8D
 
 }
 
@@ -43,7 +43,7 @@ class Player(val game: Game, initialPosition: V2D, initialDirection: V2D, val pl
 
   def position = _position
   def direction = _direction
-  def scale = 6D
+  def scale = 5D
 
   def texture = {
     if((turnLeft && turnRight) || (!turnLeft && !turnRight)) carTextures(0)

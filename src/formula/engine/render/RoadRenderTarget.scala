@@ -5,8 +5,7 @@ import java.awt._
 
 class RoadRenderTarget(camera: Camera) extends RenderTarget {
 
-  val DEBUG_ROAD_WIDTH = 15D
-  val CONSTANT1 = 0.472D
+  val DEBUG_ROAD_WIDTH = 25D
 
   //TODO: RoadRendering will get the associated Path from Track
   val path = formula.io.FormulaIO.loadDemoPath("test2.png")
@@ -66,17 +65,13 @@ class RoadRenderTarget(camera: Camera) extends RenderTarget {
         val endPoints = camera.translateLine(end, DEBUG_ROAD_WIDTH)
         */
 
-        var d1 = 1 - (start distSqr camera.position) / (CONSTANT1 * Camera.SCAN_DIST * Camera.SCAN_DIST)
-        var d2 = 1 - (end distSqr camera.position) / (CONSTANT1 * Camera.SCAN_DIST * Camera.SCAN_DIST)
-        if(d1 < 0) d1 = 0
-        if(d2 < 0) d2 = 0
-
-        val p1 = camera.translatePoint(start - startPerp * DEBUG_ROAD_WIDTH * d1)
-        val p2 = camera.translatePoint(start + startPerp * DEBUG_ROAD_WIDTH * d1)
-        val p3 = camera.translatePoint(end - startPerp * DEBUG_ROAD_WIDTH * d2)
-        val p4 = camera.translatePoint(end + startPerp * DEBUG_ROAD_WIDTH * d2)
-        val p5 = camera.translatePoint(end - endPerp * DEBUG_ROAD_WIDTH * d2)
-        val p6 = camera.translatePoint(end + endPerp * DEBUG_ROAD_WIDTH * d2)
+        val d = DEBUG_ROAD_WIDTH / 2
+        val p1 = camera.translatePoint(start - (startPerp * d))
+        val p2 = camera.translatePoint(start + (startPerp * d))
+        val p3 = camera.translatePoint(end - (startPerp * d))
+        val p4 = camera.translatePoint(end + (startPerp * d))
+        val p5 = camera.translatePoint(end - (endPerp * d))
+        val p6 = camera.translatePoint(end + (endPerp * d))
 
 
 
