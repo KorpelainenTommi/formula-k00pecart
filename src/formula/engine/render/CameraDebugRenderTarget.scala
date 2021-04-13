@@ -9,6 +9,10 @@ class CameraDebugRenderTarget(camera: Camera, lineColor: Color) extends RenderTa
     )
   }
 
+  private def drawL(pos1: V2D, pos2: V2D, g: Graphics2D) = {
+      g.drawLine(math.round(pos1.x).toInt, math.round(pos1.y).toInt, math.round(pos2.x).toInt, math.round(pos2.y).toInt)
+    }
+
   override protected def personalRender(g: Graphics2D) = {
 
     val camPos = translatePos(camera.position)
@@ -22,14 +26,10 @@ class CameraDebugRenderTarget(camera: Camera, lineColor: Color) extends RenderTa
     g.setStroke(new BasicStroke(2))
     g.setColor(lineColor)
 
-    def drawL(pos1: V2D, pos2: V2D) = {
-      g.drawLine(math.round(pos1.x).toInt, math.round(pos1.y).toInt, math.round(pos2.x).toInt, math.round(pos2.y).toInt)
-    }
-
-    drawL(camStartL, camStartR)
-    drawL(camStartL, camEndL)
-    drawL(camStartR, camEndR)
-    drawL(camEndL, camEndR)
+    drawL(camStartL, camStartR, g)
+    drawL(camStartL, camEndL, g)
+    drawL(camStartR, camEndR, g)
+    drawL(camEndL, camEndR, g)
 
 
     /* Debug show Camera bounding box
@@ -64,26 +64,25 @@ class PathDebugRenderTarget(lineColor: Color) extends RenderTarget {
     )
   }
 
+  private def drawL(pos1: V2D, pos2: V2D, g: Graphics2D) = {
+    g.drawLine(math.round(pos1.x).toInt, math.round(pos1.y).toInt, math.round(pos2.x).toInt, math.round(pos2.y).toInt)
+  }
+
+  private def drawP(pos: V2D, g: Graphics2D) = {
+    g.fillRect(math.round(pos.x).toInt, math.round(pos.y).toInt, 2, 2)
+  }
+
   override protected def personalRender(g: Graphics2D) = {
-
-
-    def drawL(pos1: V2D, pos2: V2D) = {
-      g.drawLine(math.round(pos1.x).toInt, math.round(pos1.y).toInt, math.round(pos2.x).toInt, math.round(pos2.y).toInt)
-    }
-
-    def drawP(pos: V2D) = {
-      g.fillRect(math.round(pos.x).toInt, math.round(pos.y).toInt, 2, 2)
-    }
 
     g.setStroke(new BasicStroke(2))
     g.setColor(lineColor)
 
     for(i <- path.indices) {
-      drawL(translatePos(path(i)), translatePos(path(i+1)))
+      drawL(translatePos(path(i)), translatePos(path(i+1)), g)
     }
 
     g.setColor(Color.GREEN)
-    path.foreach(p => drawP(translatePos(p)))
+    path.foreach(p => drawP(translatePos(p), g))
 
   }
 

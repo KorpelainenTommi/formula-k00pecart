@@ -31,7 +31,6 @@ class PlayerRenderTarget(private val players: Vector[Player], private val camera
       g.drawImage(FormulaIO.getTexture(playerTexture), math.round(absoluteBounds.x + width * x).toInt, math.round(absoluteBounds.y + height * y).toInt,
         math.round(absoluteBounds.width * w).toInt, math.round(absoluteBounds.height * h).toInt, null)
       })
-
     })
   }
 }

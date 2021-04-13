@@ -1,7 +1,7 @@
 package formula.engine
 import formula.io._
 
-object ClosedPath extends Serializable[ClosedPath] {
+object ClosedPath extends Serializer[ClosedPath] {
 
   override def save(saveable: ClosedPath): Array[Byte] = FormulaIO.saveInt(saveable.length) ++ saveable._points.flatMap(V2D.save)
   override def load(bytes: Array[Byte], start: Int): ClosedPath = {

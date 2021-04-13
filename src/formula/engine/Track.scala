@@ -3,7 +3,7 @@ import scala.collection.mutable.BitSet
 import java.awt.image.BufferedImage
 import formula.io._
 
-object TrackPreview extends Serializable[TrackPreview] {
+object TrackPreview extends Serializer[TrackPreview] {
   override def load(bytes: Array[Byte], start: Int): TrackPreview = {
     Track.loadHeader(bytes, start)._1
   }
@@ -62,7 +62,7 @@ class TrackPreview(val trackName: String, val description: String = "", val crea
   }
 }
 
-object Track extends Serializable[Track] {
+object Track extends Serializer[Track] {
 
   def describeTrackTime(time: (Int, String)) = {
 

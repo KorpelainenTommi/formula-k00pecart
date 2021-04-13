@@ -3,17 +3,21 @@ import formula.engine.V2D
 
 import java.awt.event.KeyEvent
 
-trait Serializable[T] {
+/** Trait describing that this object or class provides a way to transform
+ *  an instance of T to bytes, and from bytes
+ * @tparam T The type this object/class can serialize/deserialize
+ */
+trait Serializer[T] {
   def save(saveable: T): Array[Byte]
   def load(bytes: Array[Byte], start: Int): T
   def load(bytes: Array[Byte]): T = load(bytes, 0)
 }
 
 case class Settings(resolution: Int, fullScreen: Boolean, player1Controls: Array[Int], player2Controls: Array[Int]) {
-  def screenSize = Settings.resolutions(resolution)
+  def screenSize = Settings.resolutions(if(resolution < 0 || resolution >= Settings.resolutions.length) 0 else resolution)
 }
 
-object Settings extends Serializable[Settings] {
+object Settings extends Serializer[Settings] {
 
   //Default 16:9 resolutions
   val resolutions = Vector(
@@ -24,8 +28,12 @@ object Settings extends Serializable[Settings] {
     V2D(1920, 1080)
   )
 
+  /* Mapping of virtual keys to their names
+   * There isn't an existing function for this (at least to my knowledge)
+   * since virtual keys aren't officially named. It is dependent on the key layout.
+   * For example, the virtual key S is actually the key O in a dvorak keyboard.
+   * */
   def keyName(keyCode: Int) = {
-
     keyCode match {
       case KeyEvent.VK_0 => "0"
       case KeyEvent.VK_1 => "1"

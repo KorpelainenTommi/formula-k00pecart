@@ -23,7 +23,8 @@ import formula.io._
     def ang(v: V2D)            = V2D.ang(this, v)
     def angDeg(v: V2D)         = V2D.angDeg(this, v)
 
-    def rot(d: Double)         = V2D(math.cos(d) * x - math.sin(d) * y, math.sin(d) * x + math.cos(d) * y) //positive is clockwise
+    //positive is clockwise
+    def rot(d: Double)         = V2D(math.cos(d) * x - math.sin(d) * y, math.sin(d) * x + math.cos(d) * y)
     def rotDeg(d: Double)      = rot(math.Pi * d / 180.0)
 
     def lowerThan(v: V2D)      = V2D.lowerThan(this, v)
@@ -34,7 +35,7 @@ import formula.io._
     override def toString      = s"($x, $y)"
   }
 
-  object V2D extends Serializable[V2D] {
+  object V2D extends Serializer[V2D] {
     val r = V2D( 1, 0)
     val l = V2D(-1, 0)
     val u = V2D( 0,-1)

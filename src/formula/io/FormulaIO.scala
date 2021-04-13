@@ -36,9 +36,23 @@ object FormulaIO {
 
   //Using absolute filepaths instead of relative paths gives debugging more clarity
   private val _cwd = java.nio.file.Paths.get("").toAbsolutePath.toString
+
+  /* resolvePath with variable length arguments is nice, but has downsides for overloading:
+  *  1. In order to be able to pass a Seq as an argument, the parameter type needs to Seq,
+  *  but Seq[String] and String* have the same type after type erasure, so these method signatures are
+  *  identical after type erasure.
+  *
+  *  2. The method cannot have parameters with default values, so resolveName cannot be an overload either.
+  *  Aww man...
+  * */
   def resolvePathS(parts: Seq[String]) = parts.foldLeft(_cwd)(_ + File.separator + _)
-  def resolvePath(parts: String*) = parts.foldLeft(_cwd)(_ + File.separator + _)
+  def resolveNameS(parts: Seq[String]) = parts.foldLeft("")(_ + File.separator + _)
+  def resolvePath(parts: String*)      = parts.foldLeft(_cwd)(_ + File.separator + _)
+  def resolveName(parts: String*)      = parts.foldLeft("")(_ + File.separator + _)
   def currentDirectory = _cwd
+
+
+  //Generic serialization/deserializtion of double, integer and string types
 
   def saveDouble(d: Double)                     = ByteBuffer.allocate(8).order(ENDIAN).putDouble(d).array
   def loadDouble(buf: Array[Byte], offset: Int) = ByteBuffer.wrap(buf, offset, 8).order(ENDIAN).getDouble
@@ -48,6 +62,7 @@ object FormulaIO {
 
   def saveString(s: String) = (s.filter(_ != STRING_SEP_CHAR) + STRING_SEP_CHAR).getBytes(ENCODING)
   def loadString(buf: Array[Byte], offset: Int) = {
+    //Step through memory until bytes corresponding to a STRING_SEP_CHAR are encountered
     var idx = offset
     while(idx+1 < buf.length && (buf(idx) != STRING_SEP_BYTES(0) || buf(idx+1) != STRING_SEP_BYTES(1))) {
       idx += 2
@@ -56,6 +71,8 @@ object FormulaIO {
   }
 
 
+
+  //Read until EOF
   private def readAll(rdr: Reader) = {
     var total = 0
     var charsRead = 0
@@ -68,11 +85,14 @@ object FormulaIO {
     data.take(total).mkString.getBytes(ENCODING)
   }
 
+  //TODO: This is pretty sus
   def bytesToChar(bytes: Array[Byte]) = {
     //Since a char is 2 bytes wide, we want an even number of bytes
     val data: Array[Byte] = if(bytes.length % 2 == 0) bytes else bytes :+ 0
     new String(data, ENCODING).toCharArray
   }
+
+
 
   def saveSettings(settings: Settings) = {
     var wtr: Option[BufferedWriter] = None
@@ -166,6 +186,20 @@ object FormulaIO {
   }
 
 
+  def deleteFile(filename: String) = {
+    val f = new File(filename)
+    if(!f.exists()) false
+    else {
+      try {
+        f.delete()
+      }
+
+      catch {
+        case _: IOException | _: java.lang.SecurityException => false
+      }
+    }
+  }
+
 
   def listTrackFiles = {
     val trackDir = new File(resolvePath("data", "tracks"))
@@ -173,6 +207,7 @@ object FormulaIO {
       override def accept(dir: File, name: String) = name.endsWith(".trck")
     }).map(_.getName).toVector
   }
+
 
   def loadTrackPreview(name: String) = {
     var rdr: Option[BufferedReader] = None
@@ -229,7 +264,7 @@ object FormulaIO {
   }
 
 
-  //FOR DEBUGGING
+  //TODO: FOR DEBUGGING, remove these later
   def readFile(pathParts: String*) = {
     var rdr: Option[BufferedReader] = None
 
@@ -239,7 +274,6 @@ object FormulaIO {
     }
 
     catch {
-      //Initialize with default settings
       case _: FileNotFoundException | _: IOException => Array[Char]()
     }
 

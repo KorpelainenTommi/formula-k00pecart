@@ -1,7 +1,7 @@
 package formula.engine.render
 import formula.engine._
-
 import java.awt.Graphics2D
+
 class BaseRenderTarget(val onRenderComplete: () => Unit) extends RenderTarget {
 
   private var cleaned = false

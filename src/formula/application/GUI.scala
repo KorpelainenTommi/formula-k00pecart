@@ -98,9 +98,31 @@ package formula.application {
     this.setOpaque(false)
   }
 
+  class Slider
+  (val isVertical: Boolean = false,
+   val minValue: Int = 0,
+   val maxValue: Int = 10,
+   val minorSpacing: Int = 1,
+   val majorSpacing: Int = 5,
+   protected var onchange: Int => Unit = _ => ())
+   extends JSlider(if(isVertical) SwingConstants.VERTICAL else SwingConstants.HORIZONTAL, minValue, maxValue, (maxValue-minValue) / 2) with ComponentPercentBounds {
+    override def component = this
+    this.setMinorTickSpacing(minorSpacing)
+    this.setMajorTickSpacing(majorSpacing)
+    this.setPaintTicks(true)
+    this.setPaintLabels(true)
+    this.setOpaque(false)
+    this.addChangeListener((e) => {
+      val sl = e.getSource.asInstanceOf[JSlider]
+      if(!sl.getValueIsAdjusting) {
+        onchange(sl.getValue)
+      }
+    })
+  }
+
   class GrayButton
   (val title: String,
-  val onclick: () => Unit = () => ())
+   protected var onclick: () => Unit = () => ())
   extends JButton(title) with ComponentPercentBounds {
 
     override def paintComponent(g: Graphics) = {
@@ -118,29 +140,53 @@ package formula.application {
       this.setFont(FormulaIO.getFont(GUIConstants.DEFAULT_FONT).deriveFont((width * GUIConstants.FONT_SIZE).toFloat))
     }
 
+    protected def defaultColor = GUIConstants.COLOR_BLANK
+    protected def hoverColor   = GUIConstants.COLOR_BUTTON_HOVER
+    protected def pressedColor = GUIConstants.COLOR_BUTTON_PRESSED
+    protected def clicked() = {}
+
     this.setBorderPainted(false)
     this.setFocusPainted(false)
     this.setContentAreaFilled(false)
-    this.setBackground(GUIConstants.COLOR_BLANK)
+    this.setBackground(defaultColor)
+
 
     private val button = this
     this.addMouseListener(new MouseAdapter() {
       override def mouseEntered(e: MouseEvent) = {
-        button.setBackground(GUIConstants.COLOR_BUTTON_HOVER)
+        button.setBackground(hoverColor)
       }
       override def mouseExited(e: MouseEvent) = {
-        button.setBackground(GUIConstants.COLOR_BLANK)
+        button.setBackground(defaultColor)
       }
       override def mousePressed(e: MouseEvent) = {
-        button.setBackground(GUIConstants.COLOR_BUTTON_PRESSED)
+        button.setBackground(pressedColor)
+        clicked()
         onclick()
       }
       override def mouseReleased(e: MouseEvent) = {
-        button.setBackground(GUIConstants.COLOR_BLANK)
+        button.setBackground(defaultColor)
       }
     })
 
     this.percentSize = (GUIConstants.BUTTON_WIDTH, GUIConstants.BUTTON_HEIGHT)
+  }
+
+  class ToggleButton(title: String, ontoggleclick: Boolean => Unit = _ => ()) extends GrayButton(title) {
+
+    protected var _active = false
+    def active = _active
+    def active_=(value: Boolean) = {
+      _active = value
+      setBackground(defaultColor)
+    }
+
+    onclick = () => { ontoggleclick(active) }
+
+    override def defaultColor = if(active) GUIConstants.COLOR_BUTTON_ACTIVE else GUIConstants.COLOR_BLANK
+    override def clicked() = {
+      _active = !_active
+    }
   }
 
   class TextInput

@@ -3,6 +3,7 @@ import formula.engine.TrackPreview
 import formula.application._
 import formula.io._
 
+
 object TrackSelectScreen {
 
   sealed trait Mode
@@ -49,13 +50,34 @@ class TrackSelectScreen(val purpose: TrackSelectScreen.Mode = TrackSelectScreen.
 
     if(purpose == TrackSelectScreen.TrackTool) {
 
-      val editButton = new GrayButton("Edit", () => {/*Transition to tracktool in edit mode*/})
+      val editButton = new GrayButton("Edit", () => {
+        if(trackImages.selectedIndex != -1) {
+
+        }
+        else {
+          MainApplication.messageBox("Select a track first")
+        }
+      })
       editButton.percentPosition = (0.25, 0.85)
       components += editButton
 
-      val newButton = new GrayButton("New track", () => {/*Transition to tracktool in new mode*/})
+      val newButton = new GrayButton("New track", () => { MainApplication.transition(new TrackToolScreen) })
       newButton.percentPosition = (0.05, 0.85)
       components += newButton
+
+      val deleteButton = new GrayButton("Delete", () => {
+        if(trackImages.selectedIndex != -1) {
+          val filename = trackfileNames(trackImages.selectedIndex)
+          if(MainApplication.confirmBox("This will delete the track. Are you sure?")) {
+            if(!FormulaIO.deleteFile(filename)) MainApplication.messageBox("Could not delete track file")
+          }
+        }
+        else {
+          MainApplication.messageBox("Select a track first")
+        }
+      })
+      deleteButton.percentPosition = (0.45, 0.85)
+      components += deleteButton
     }
 
     if(purpose == TrackSelectScreen.Race) {
