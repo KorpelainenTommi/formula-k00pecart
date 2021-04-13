@@ -1,5 +1,4 @@
 
-
 //////////////////////////////////////////////////////////////////////////
 ////////////////////////////Schedule://///////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -9,11 +8,11 @@
 20.2 - 28.2 Prep work, creating visual assets, base structure //DONE
 1.3 - 7.3 Templates for Screens, Screen transitioning, Swing boilerplate //DONE
 8.3 - 14.3 Track file and settings structure, IO, V2D and other utility classes //DONE
-15.3 - 29.3 Rendering system for game, swing layouts for screens ready //DONE (but some parts of the rendering system could be reworked, as road rendering is a bit buggy)
-30.3 - 6.4 Game logic, testing and tweaking //TODO at the moment: detect when a player is on the road, implement checkpoints and keep track of time. Win condition for race
-7.4 - 15.4 Track tool
-16.4 - 19.4 Finishing up and testing
-19.4-28.4 Documentation, polishing
+15.3 - 29.3 Rendering system for game, swing layouts for screens ready //DONE
+30.3 - 6.4 Game logic, testing and tweaking //TODO: after the track tool is ready, rest of the game functionality will be implemented
+7.4 - 15.4 Track tool // TODO: Track tool is still in the works, but the main track creation functionality is tested and working
+SCHEDULE CHANGED 16.4 - 22.4 (from 16.4 - 19.4) Finishing up and testing
+SCHEDULE CHANGED 22.4 - 28.4 (from 19.4-28.4) Documentation, polishing
 
 
 
@@ -21,6 +20,23 @@
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////Notes and progress//////////////////////////////
 //////////////////////////////////////////////////////////////////////////
+
+14.4
+-Less work has been done than expected because of other ongoing courses, but after 16.4, there will be more time for this project
+-Switching up the order of implementation, work has been started on the track tool, to speed up later implementing the rest of the game functionality
+(more playable track files helps with testing, especially with the computer controlled player. The track tool allows creating varied, and intentionally
+difficult tracks for the AI, to catch problems easier)
+
+-Project is currently behind schedule, but should get caught up during the time period between 16.4 - 22.4
+-In order to properly finish coding the project, slightly less time will be allocated for documentation (from 9 days allocated, to 6 days allocated)
+
+-Scheduling changes like this were expected when planning, which is why a lot of time was reserved for finishing up and documenting the project
+
+
+
+
+
+
 
 31.3
 -Added DemoTrack.trck, which is the first track with correct path data for the track (added to the track file manually). Path data will be added to a track file
@@ -38,6 +54,7 @@ Player movement (movement speed, turning speed etc.) is independent from frame r
 -Some parts of the code could use refactoring and maintenance
 
 -Project is progressing at the expected rate, and is on schedule.
+
 
 
 
