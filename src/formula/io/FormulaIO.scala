@@ -14,7 +14,6 @@ object FormulaIO {
   //Explicitly use little endian for cross platform compatibility of files
   private val ENCODING = java.nio.charset.StandardCharsets.UTF_16LE
   private val ENDIAN = ByteOrder.LITTLE_ENDIAN
-  private val BUFFER_SIZE = 1024
   val STRING_SEP_CHAR = '\u00b6'
   val STRING_SEP_BYTES = "\u00b6".getBytes(ENCODING)
   class ResourceLoadException(val resourcePath: String) extends Exception(s"No resource at path $resourcePath could be loaded")
@@ -70,36 +69,16 @@ object FormulaIO {
     (bytesToChar(buf.slice(offset, idx)).mkString, (idx-offset) + 2)
   }
 
-
-
-  //Read until EOF
-  private def readAll(rdr: Reader) = {
-    var total = 0
-    var charsRead = 0
-    val data = scala.collection.mutable.ArrayBuffer[Char]()
-    val buffer = Array.ofDim[Char](BUFFER_SIZE)
-    while({charsRead = rdr.read(buffer); charsRead != -1}) {
-      data.appendAll(buffer)
-      total += charsRead
-    }
-    data.take(total).mkString.getBytes(ENCODING)
+  protected def bytesToChar(bytes: Array[Byte]) = {
+    new String(bytes, ENCODING).toCharArray
   }
 
-  //TODO: This is pretty sus
-  def bytesToChar(bytes: Array[Byte]) = {
-    //Since a char is 2 bytes wide, we want an even number of bytes
-    val data: Array[Byte] = if(bytes.length % 2 == 0) bytes else bytes :+ 0
-    new String(data, ENCODING).toCharArray
-  }
-
-
-
-  def saveSettings(settings: Settings) = {
-    var wtr: Option[BufferedWriter] = None
+  protected def saveFile(bytes: Array[Byte], fullpath: String) = {
+    var outStream: Option[FileOutputStream] = None
 
     try {
-      wtr = Some(new BufferedWriter(new FileWriter(resolvePath("data", "settings.dat"))))
-      wtr.get.write(bytesToChar(Settings.save(settings)))
+      outStream = Some(new FileOutputStream(new File(fullpath)))
+      outStream.get.write(bytes)
       true
     }
 
@@ -108,26 +87,51 @@ object FormulaIO {
     }
 
     finally {
-      wtr.foreach(_.close())
+      outStream.foreach(_.close())
+    }
+  }
+
+  protected def loadFile(fullpath: String) = {
+    var inStream: Option[FileInputStream] = None
+
+    try {
+      inStream = Some(new FileInputStream(new File(fullpath)))
+      Some(inStream.get.readAllBytes())
+    }
+
+    catch {
+      case _: FileNotFoundException | _: IOException => None
+    }
+
+    finally {
+      inStream.foreach(_.close())
+    }
+  }
+
+  protected def deleteFile(fullpath: String) = {
+    val f = new File(fullpath)
+    if(!f.exists()) false
+    else {
+      try {
+        f.delete()
+      }
+
+      catch {
+        case _: IOException | _: java.lang.SecurityException => false
+      }
     }
   }
 
 
+
+  def saveSettings(settings: Settings) = {
+    saveFile(Settings.save(settings), resolvePath("data", "settings.dat"))
+  }
+
   def loadSettings = {
-    var rdr: Option[BufferedReader] = None
-
-    try {
-      rdr = Some(new BufferedReader(new FileReader(resolvePath("data", "settings.dat"))))
-      Settings.load(readAll(rdr.get))
-    }
-
-    catch {
-      //Initialize with default settings
-      case _: FileNotFoundException | _: IOException => Settings.defaultSettings
-    }
-
-    finally {
-      rdr.foreach(_.close())
+    loadFile(resolvePath("data", "settings.dat")) match {
+      case Some(data) => Settings.load(data)
+      case None => Settings.defaultSettings
     }
   }
 
@@ -185,22 +189,6 @@ object FormulaIO {
     loadedFonts(f)
   }
 
-
-  def deleteFile(filename: String) = {
-    val f = new File(filename)
-    if(!f.exists()) false
-    else {
-      try {
-        f.delete()
-      }
-
-      catch {
-        case _: IOException | _: java.lang.SecurityException => false
-      }
-    }
-  }
-
-
   def listTrackFiles = {
     val trackDir = new File(resolvePath("data", "tracks"))
     trackDir.listFiles(new FilenameFilter {
@@ -208,79 +196,23 @@ object FormulaIO {
     }).map(_.getName).toVector
   }
 
-
-  def loadTrackPreview(name: String) = {
-    var rdr: Option[BufferedReader] = None
-
-    try {
-      rdr = Some(new BufferedReader(new FileReader(resolvePath("data", "tracks", name))))
-      Some(TrackPreview.load(readAll(rdr.get)))
-    }
-
-    catch {
-      //Loading track preview failed
-      case _: FileNotFoundException | _: IOException => None
-    }
-
-    finally {
-      rdr.foreach(_.close())
-    }
+  def loadTrackPreview(filename: String) = {
+    loadFile(resolvePath("data", "tracks", filename)).map(TrackPreview.load)
   }
 
-  def loadTrack(name: String) = {
-    var rdr: Option[BufferedReader] = None
-
-    try {
-      rdr = Some(new BufferedReader(new FileReader(resolvePath("data", "tracks", name))))
-      Some(Track.load(readAll(rdr.get)))
-    }
-
-    catch {
-      //Loading track preview failed
-      case _: FileNotFoundException | _: IOException => None
-    }
-
-    finally {
-      rdr.foreach(_.close())
-    }
+  def loadTrack(filename: String) = {
+    loadFile(resolvePath("data", "tracks", filename)).map(Track.load)
   }
 
   def saveTrack(track: Track) = {
-    var wtr: Option[BufferedWriter] = None
+    saveFile(Track.save(track), resolvePath("data", "tracks", (track.trackName+".trck")))
+  }
 
-    try {
-      wtr = Some(new BufferedWriter(new FileWriter(resolvePath("data", "tracks", (track.trackName+".trck")))))
-      wtr.get.write(bytesToChar(Track.save(track)))
-      true
-    }
-
-    catch {
-      case _: FileNotFoundException | _: IOException => false
-    }
-
-    finally {
-      wtr.foreach(_.close())
-    }
+  def deleteTrack(filename: String) = {
+    deleteFile(resolvePath("data", "tracks", filename))
   }
 
 
-  //TODO: FOR DEBUGGING, remove these later
-  def readFile(pathParts: String*) = {
-    var rdr: Option[BufferedReader] = None
-
-    try {
-      rdr = Some(new BufferedReader(new FileReader(resolvePathS(pathParts))))
-      readAll(rdr.get)
-    }
-
-    catch {
-      case _: FileNotFoundException | _: IOException => Array[Char]()
-    }
-
-    finally {
-      rdr.foreach(_.close())
-    }
-  }
 
   def loadDemoBitSet(name: String) = {
     val demoimg = FormulaIO.loadImage(name)

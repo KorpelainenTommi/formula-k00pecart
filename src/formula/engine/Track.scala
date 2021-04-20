@@ -134,15 +134,18 @@ object Track extends Serializer[Track] {
 
 class Track(trackName: String, description: String = "", creator: String = "Unknown", version: Byte = 0) extends TrackPreview(trackName, description, creator, version) {
 
-  //Debug
-  //TODO: Make _road back to private
-  var _road = BitSet()
+  private var _road = BitSet()
   def road(point: V2D): Boolean = {
     road(math.round(point.x).toInt, math.round(point.y).toInt)
   }
 
   def road(x: Int, y: Int): Boolean = {
     _road(x+y*Track.TRACK_WIDTH)
+  }
+
+  //TODO: DEBUG
+  def writeRoad(x: Int, y: Int) = {
+    _road += (x+y*Track.TRACK_WIDTH)
   }
 
   protected def initializeRoad() = {

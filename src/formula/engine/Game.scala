@@ -7,15 +7,16 @@ object Game {
 
 }
 
-class Game(val track: Track) {
+class Game(val track: Track, val nOfPlayers: Int) {
 
-  private val player1 = new Player(this, V2D(100, 208), V2D.u, 0)
-  private val player2 = new Player(this, V2D(2 * Track.TRACK_WIDTH / 3, 2 * Track.TRACK_HEIGHT / 3), V2D.u, 1)
+  //private val player1 = new Player(this, V2D(100, 208), V2D.u, 0)
+  //private val player2 = new Player(this, V2D(2 * Track.TRACK_WIDTH / 3, 2 * Track.TRACK_HEIGHT / 3), V2D.u, 1)
+
   private val player1Input = Array.fill[Boolean](Settings.defaultPlayer1Controls.length)(false)
   private val player2Input = Array.fill[Boolean](Settings.defaultPlayer1Controls.length)(false)
 
   private val playerInput = Vector(player1Input, player2Input)
-  val players = Vector(player1, player2)
+  val players = Vector.tabulate(nOfPlayers)(new Player(this, V2D(100, 208), V2D.u, _))
 
 
   def player(playerNumber: Int) = players(playerNumber)

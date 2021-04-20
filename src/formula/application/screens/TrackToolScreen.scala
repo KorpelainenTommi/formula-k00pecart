@@ -85,37 +85,41 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
       }
     }
 
-    val toggleButtons = Array.ofDim[ToggleButton](3)
-
-    val roadButton = new ToggleButton("Draw road", (active: Boolean) => {
-      toggleButtons.zipWithIndex.filter(_._2 != 0).foreach(_._1.active = false)
-      trackTool.mode = if(active) TrackTool.DrawRoad else TrackTool.NoSelection
+    val toggleButtons = Array.ofDim[ToggleButton](4)
+    def deactivateOthers(n: Int) = {
+      toggleButtons.zipWithIndex.filter(_._2 != n).foreach(_._1.active = false)
       updateVisibleControls()
       this.panel.repaint()
-    })
+    }
+
+    //There was a lot of copy-paste code, this generalizes that
+    //In hindsight, togglebuttons should have been a radio button group instead
+    def makeToggleFunction(n: Int, targetMode: TrackTool.Mode) = {
+      (active: Boolean) => {
+        trackTool.mode = if(active) targetMode else TrackTool.NoSelection
+        deactivateOthers(n)
+      }
+    }
+
+    val roadButton = new ToggleButton("Draw road", makeToggleFunction(0, TrackTool.DrawRoad))
     roadButton.percentPosition = (0.025, 0.05)
     components += roadButton
     toggleButtons(0) = roadButton
 
-    val shortcutButton = new ToggleButton("Draw shortcut", (active: Boolean) => {
-      toggleButtons.zipWithIndex.filter(_._2 != 1).foreach(_._1.active = false)
-      trackTool.mode = if(active) TrackTool.DrawShortcut else TrackTool.NoSelection
-      updateVisibleControls()
-      this.panel.repaint()
-    })
+    val shortcutButton = new ToggleButton("Draw shortcut", makeToggleFunction(1, TrackTool.DrawShortcut))
     shortcutButton.percentPosition = (0.2, 0.05)
     components += shortcutButton
     toggleButtons(1) = shortcutButton
 
-    val objectButton = new ToggleButton("Place objects", (active: Boolean) => {
-      toggleButtons.zipWithIndex.filter(_._2 != 2).foreach(_._1.active = false)
-      trackTool.mode = if(active) TrackTool.PlaceObjects else TrackTool.NoSelection
-      updateVisibleControls()
-      this.panel.repaint()
-    })
+    val objectButton = new ToggleButton("Place objects", makeToggleFunction(2, TrackTool.PlaceObjects))
     objectButton.percentPosition = (0.375, 0.05)
     components += objectButton
     toggleButtons(2) = objectButton
+
+    val goalButton = new ToggleButton("Move goal", makeToggleFunction(3, TrackTool.PlaceGoal))
+    goalButton.percentPosition = (0.55, 0.05)
+    components += goalButton
+    toggleButtons(3) = goalButton
 
     trackTool.onTrackCompleted = () => {
 
@@ -143,6 +147,11 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
         }
       })
     }
+  }
+
+  override def deactivate(): Unit = {
+    tool.foreach(_.exit())
+    super.deactivate()
   }
 
 }

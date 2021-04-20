@@ -11,13 +11,13 @@ class GameScreen(track: Track) extends Screen with TextureLoader {
   override protected def textures = Textures.GAME_TEXTURES
 
 
-  val game = new Game(track)
+  val game = new Game(track, 2)
 
   val mainRenderTarget = new BaseRenderTarget(() => game.gameUpdate())
   mainRenderTarget.percentBounds = (0, 0, 1, 1)
-
-  mainRenderTarget.addSubTarget(new GameRenderTarget(game, 0))
-  mainRenderTarget.addSubTarget(new GameRenderTarget(game, 1))
+  for(i <- 0 until game.nOfPlayers) {
+    mainRenderTarget.addSubTarget(new GameRenderTarget(game, i))
+  }
 
   val _panel = new RenderPanel(mainRenderTarget)
   override def panel = _panel

@@ -23,7 +23,13 @@ object TrackTool {
 class TrackTool {
 
   val trackImage = new BufferedImage(Track.TRACK_WIDTH, Track.TRACK_HEIGHT, BufferedImage.TYPE_INT_ARGB)
-  protected val trackGraphics = trackImage.getGraphics.asInstanceOf[Graphics2D]
+  protected val trackGraphics = trackImage.createGraphics()
+
+
+  def exit() = {
+    //Release resources
+    trackGraphics.dispose()
+  }
 
 
   protected var _mousePosition = V2D(-1, -1)
@@ -32,8 +38,9 @@ class TrackTool {
     val lastPos = _mousePosition
     _mousePosition = value
 
-    if(mode == TrackTool.DrawRoad && drawingTrack) {
-      trackDrawUpdate(lastPos, _mousePosition)
+    mode match {
+      case TrackTool.DrawRoad if drawingTrack => trackDrawUpdate(lastPos, _mousePosition)
+      case _ =>
     }
   }
 

@@ -69,7 +69,13 @@ class TrackSelectScreen(val purpose: TrackSelectScreen.Mode = TrackSelectScreen.
         if(trackImages.selectedIndex != -1) {
           val filename = trackfileNames(trackImages.selectedIndex)
           if(MainApplication.confirmBox("This will delete the track. Are you sure?")) {
-            if(!FormulaIO.deleteFile(filename)) MainApplication.messageBox("Could not delete track file")
+            if(FormulaIO.deleteTrack(filename)) {
+              MainApplication.messageBox("Track deleted successfully")
+              MainApplication.transition(new TrackSelectScreen(TrackSelectScreen.TrackTool))
+            }
+            else {
+              MainApplication.messageBox("Could not delete track file")
+            }
           }
         }
         else {

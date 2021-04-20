@@ -23,7 +23,7 @@ class MainMenuScreen extends StaticScreen(Textures.Background_Mainmenu, Textures
     exitButton.percentPosition = (0.7, 0.35)
     components += exitButton
 
-    val versionLabel = new FontLabel("ver1.8 Tommi Korpelainen", fontColor = java.awt.Color.BLACK)
+    val versionLabel = new FontLabel("ver2.0 Tommi Korpelainen", fontColor = java.awt.Color.BLACK)
     versionLabel.percentBounds = (0.34, 0.88, 0.2, 0.05)
     components += versionLabel
 
