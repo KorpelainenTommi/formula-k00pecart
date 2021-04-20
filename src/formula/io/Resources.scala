@@ -29,15 +29,16 @@ object Textures extends Resource {
   val CarRedTurnLeft = Value
   val CarRedTurnRight = Value
 
-  val CarBlueBack = Value
-  val CarBlueFront = Value
-  val CarBlueLeft = Value
-  val CarBlueRight = Value
-  val CarBlueLeftFront = Value
-  val CarBlueRightFront = Value
-  val CarBlueTurnLeft = Value
-  val CarBlueTurnRight = Value
+  val CarOrangeBack = Value
+  val CarOrangeFront = Value
+  val CarOrangeLeft = Value
+  val CarOrangeRight = Value
+  val CarOrangeLeftFront = Value
+  val CarOrangeRightFront = Value
+  val CarOrangeTurnLeft = Value
+  val CarOrangeTurnRight = Value
 
+  val GearR = Value
   val Gear0 = Value
   val Gear1 = Value
   val Gear2 = Value
@@ -49,11 +50,17 @@ object Textures extends Resource {
   val Background_Generic = Value
 
   val TRACK_TEXTURES = Vector(Goal, Road, Grass, Sky)
-  val HUD_TEXTURES = Vector(Gear0, Gear1, Gear2, Gear3, Gear4, Gear5)
-  val CAR_RED_TEXTURES = Vector(CarRedBack, CarRedTurnLeft, CarRedTurnRight, CarRedLeft, CarRedRight, CarRedLeftFront, CarRedRightFront, CarRedFront)
-  val CAR_BLUE_TEXTURES = Vector(CarBlueBack, CarBlueTurnLeft, CarBlueTurnRight, CarBlueLeft, CarBlueRight, CarBlueLeftFront, CarBlueRightFront, CarBlueFront)
+  val HUD_TEXTURES = Vector(GearR, Gear0, Gear1, Gear2, Gear3, Gear4, Gear5)
 
-  val GAME_TEXTURES = TRACK_TEXTURES ++ CAR_RED_TEXTURES ++ CAR_BLUE_TEXTURES ++ HUD_TEXTURES
+  val CAR_RED_TEXTURES = Vector(
+    CarRedBack, CarRedTurnLeft, CarRedTurnRight,
+    CarRedLeft, CarRedRight, CarRedLeftFront, CarRedRightFront, CarRedFront)
+
+  val CAR_ORANGE_TEXTURES = Vector(
+    CarOrangeBack, CarOrangeTurnLeft, CarOrangeTurnRight,
+    CarOrangeLeft, CarOrangeRight, CarOrangeLeftFront, CarOrangeRightFront, CarOrangeFront)
+
+  val GAME_TEXTURES = TRACK_TEXTURES ++ CAR_RED_TEXTURES ++ CAR_ORANGE_TEXTURES ++ HUD_TEXTURES
 
   private def fold(parts: String*) = FormulaIO.resolveNameS(parts)
   def path(t: Texture) = {
@@ -77,15 +84,16 @@ object Textures extends Resource {
       case CarRedRightFront => fold("cars", "car_red_right_front.png")
       case CarRedFront => fold("cars", "car_red_front.png")
 
-      case CarBlueBack => fold("cars", "car_red_back.png")
-      case CarBlueTurnLeft => fold("cars", "car_red_turnl.png")
-      case CarBlueTurnRight => fold("cars", "car_red_turnr.png")
-      case CarBlueLeft => fold("cars", "car_red_left.png")
-      case CarBlueRight => fold("cars", "car_red_right.png")
-      case CarBlueLeftFront => fold("cars", "car_red_left_front.png")
-      case CarBlueRightFront => fold("cars", "car_red_right_front.png")
-      case CarBlueFront => fold("cars", "car_red_front.png")
+      case CarOrangeBack => fold("cars", "car_orange_back.png")
+      case CarOrangeTurnLeft => fold("cars", "car_orange_turnl.png")
+      case CarOrangeTurnRight => fold("cars", "car_orange_turnr.png")
+      case CarOrangeLeft => fold("cars", "car_orange_left.png")
+      case CarOrangeRight => fold("cars", "car_orange_right.png")
+      case CarOrangeLeftFront => fold("cars", "car_orange_left_front.png")
+      case CarOrangeRightFront => fold("cars", "car_orange_right_front.png")
+      case CarOrangeFront => fold("cars", "car_orange_front.png")
 
+      case GearR => fold("hud", "gearR.png")
       case Gear0 => fold("hud", "gear0.png")
       case Gear1 => fold("hud", "gear1.png")
       case Gear2 => fold("hud", "gear2.png")

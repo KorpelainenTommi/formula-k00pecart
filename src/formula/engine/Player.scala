@@ -7,14 +7,14 @@ object Player {
   val TURN_RATE = 50D
   val MAX_GEAR = 5
   val GEAR_SHIFT_COOLDOWN = 0.5 //seconds
-  val CAMERA_DISTANCE = 8D
+  val CAMERA_DISTANCE = 5D
   val PLAYER_SIZE = 5D
 
 }
 
 class Player(val game: Game, initialPosition: V2D, initialDirection: V2D, val playerNumber: Int) extends Sprite {
 
-  private val carTextures = if(playerNumber == 0) Textures.CAR_RED_TEXTURES else Textures.CAR_BLUE_TEXTURES
+  private val carTextures = if(playerNumber == 0) Textures.CAR_RED_TEXTURES else Textures.CAR_ORANGE_TEXTURES
 
   protected var _turnMult = 0D
   protected var _gear = 0
@@ -45,6 +45,7 @@ class Player(val game: Game, initialPosition: V2D, initialDirection: V2D, val pl
   def position = _position
   def direction = _direction
   def scale = Player.PLAYER_SIZE
+  def color = game.playerColors(playerNumber)
 
   def texture = {
     if((turnLeft && turnRight) || (!turnLeft && !turnRight)) carTextures(0)

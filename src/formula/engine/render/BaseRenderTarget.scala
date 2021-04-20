@@ -19,11 +19,19 @@ class BaseRenderTarget(val onRenderComplete: () => Unit) extends RenderTarget {
 
   def addSubTarget(t: RenderTarget) = {
     subTargets += t
-    val d = 0.9875 / subTargets.length
-    val offs = 0.0125 / (subTargets.length+1)
-    for(i <- subTargets.indices) {
-      subTargets(i).percentPosition = ((i+1)*offs+i*d, 0)
-      subTargets(i).percentSize = (d, 1)
+
+    if(subTargets.length == 1) {
+      subTargets(0).percentPosition = (0.1, 0)
+      subTargets(0).percentSize = (0.8, 1)
+    }
+
+    else {
+      val d = 0.9875 / subTargets.length
+      val offs = 0.0125 / (subTargets.length+1)
+      for(i <- subTargets.indices) {
+        subTargets(i).percentPosition = ((i+1)*offs+i*d, 0)
+        subTargets(i).percentSize = (d, 1)
+      }
     }
   }
 

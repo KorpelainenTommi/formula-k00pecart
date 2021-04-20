@@ -129,6 +129,8 @@ object MainApplication extends App {
     false
   })
 
+  FormulaIO.saveTrack(new formula.engine.Track("AA"))
+
 
 
   /*
