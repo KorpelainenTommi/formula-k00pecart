@@ -53,6 +53,15 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
     screenDropdown.setSelectedIndex(if(MainApplication.settings.fullScreen) 1 else 0)
     subPanel.addComponent(screenDropdown)
 
+    val fpsLabel = new FontLabel("Target framerate", fontSize = 1.8F)
+    fpsLabel.percentSize = (2*GUIConstants.TEXTFIELD_WIDTH/subW, GUIConstants.TEXTFIELD_HEIGHT/subH)
+    fpsLabel.percentPosition = (0.05, 0.4)
+    subPanel.addComponent(fpsLabel)
+
+    val fpsValue = new TextInput(MainApplication.settings.targetFramerate.toString)
+    fpsValue.percentPosition = (0.05, 0.5)
+    subPanel.addComponent(fpsValue)
+
 
     val controlsLabel = new FontLabel("C O N T R O L S", fontSize = 2.3F, fontColor = GUIConstants.COLOR_HEADER)
     controlsLabel.percentSize = (2*GUIConstants.TEXTFIELD_WIDTH/subW, GUIConstants.TEXTFIELD_HEIGHT/subH)
@@ -132,8 +141,29 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
 
     //Navigation buttons
 
+    val restoreButton = new GrayButton("Default", () => {
+      if(MainApplication.confirmBox("This will restore default settings. Continue?")) {
+        fpsValue.setText(Settings.defaultSettings.targetFramerate.toString)
+        val success = FormulaIO.saveSettings(Settings.defaultSettings)
+        if(success) {
+          MainApplication.updateSettings(Settings.defaultSettings)
+          MainApplication.messageBox("Settings saved succesfully")
+          MainApplication.transition(new SettingsScreen)
+        }
+
+        else {
+          MainApplication.messageBox("Failed to save settings")
+        }
+      }
+    })
+    restoreButton.percentPosition = (0.8, 0.6)
+    components += restoreButton
+
     val saveButton = new GrayButton("Save changes", () => {
-      val newSettings = Settings(resolutionDropdown.getSelectedIndex, screenDropdown.getSelectedIndex == 1, keyCodes1, keyCodes2)
+      var targetFramerate = math.abs(fpsValue.getText.toIntOption.getOrElse(MainApplication.settings.targetFramerate))
+      if(targetFramerate == 0) targetFramerate = MainApplication.settings.targetFramerate
+      fpsValue.setText(targetFramerate.toString)
+      val newSettings = Settings(resolutionDropdown.getSelectedIndex, screenDropdown.getSelectedIndex == 1, keyCodes1, keyCodes2, targetFramerate)
       val success = FormulaIO.saveSettings(newSettings)
       if(success) {
         MainApplication.updateSettings(newSettings)
@@ -148,10 +178,16 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
     components += saveButton
 
     val backButton = new GrayButton("Back", () => {
-      val newSettings = Settings(resolutionDropdown.getSelectedIndex, screenDropdown.getSelectedIndex == 1, keyCodes1, keyCodes2)
+      var targetFramerate = math.abs(fpsValue.getText.toIntOption.getOrElse(MainApplication.settings.targetFramerate))
+      if(targetFramerate == 0) targetFramerate = MainApplication.settings.targetFramerate
+      fpsValue.setText(targetFramerate.toString)
+      val newSettings = Settings(resolutionDropdown.getSelectedIndex, screenDropdown.getSelectedIndex == 1, keyCodes1, keyCodes2, targetFramerate)
       val controlsChanged = !keyCodes1.sameElements(MainApplication.settings.player1Controls) || !keyCodes2.sameElements(MainApplication.settings.player2Controls)
 
-      if(controlsChanged || newSettings.resolution != MainApplication.settings.resolution || newSettings.fullScreen != MainApplication.settings.fullScreen) {
+      if(controlsChanged ||
+        newSettings.resolution != MainApplication.settings.resolution ||
+        newSettings.fullScreen != MainApplication.settings.fullScreen ||
+        newSettings.targetFramerate != MainApplication.settings.targetFramerate) {
         if(MainApplication.confirmBox("You have unsaved settings that will be discarded. Exit anyway?")) MainApplication.transition(new MainMenuScreen)
       }
 

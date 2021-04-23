@@ -11,7 +11,7 @@ class GameScreen(track: Track) extends Screen with TextureLoader {
   override protected def textures = Textures.GAME_TEXTURES
 
 
-  val game = new Game(track, 3)
+  val game = new Game(track, 2, 3)
 
   val mainRenderTarget = new BaseRenderTarget(() => game.gameUpdate())
   mainRenderTarget.percentBounds = (0, 0, 1, 1)
@@ -28,7 +28,7 @@ class GameScreen(track: Track) extends Screen with TextureLoader {
 
     panel.percentBounds = (0, 0, 1, 1)
     redraw()
-    game.beginGameLoop(() => {panel.repaint()})
+    game.beginGameLoop(() => panel.repaint())
   }
 
   override def deactivate() = {

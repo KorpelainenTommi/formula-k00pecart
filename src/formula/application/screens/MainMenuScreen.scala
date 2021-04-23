@@ -24,21 +24,8 @@ class MainMenuScreen extends StaticScreen(Textures.Background_Mainmenu, Textures
     components += exitButton
 
     val versionLabel = new FontLabel("ver2.0 Tommi Korpelainen", fontColor = java.awt.Color.BLACK)
-    versionLabel.percentBounds = (0.34, 0.88, 0.2, 0.05)
+    versionLabel.percentPosition = (0.34, 0.88)
     components += versionLabel
-
-  }
-
-
-  override def handleKey(e: KeyEvent): Unit = {
-
-    if(e.getID == KeyEvent.KEY_PRESSED && e.getKeyCode == KeyEvent.VK_F11) {
-      MainApplication.maximize()
-    }
-
-    if(e.getID == KeyEvent.KEY_PRESSED && e.getKeyCode == KeyEvent.VK_F12) {
-      MainApplication.normalize()
-    }
 
   }
 

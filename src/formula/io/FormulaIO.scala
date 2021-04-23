@@ -264,29 +264,15 @@ object FormulaIO {
       }
     }
 
-    def locate(point: V2D, points: scala.collection.mutable.ArrayBuffer[V2D]) = {
-    var closest, i = 0
-    var sqrD, dist = Double.PositiveInfinity
-    while(i < points.length) {
-      sqrD = point distSqr points(i)
-      if(sqrD < dist) {
-        dist = sqrD
-        closest = i
-      }
-      i += 1
-    }
-    points(closest)
-  }
-
     val points = Array.ofDim[formula.engine.V2D](redDots.length*3+1)
     points(0) = whiteDot
     var lastPoint = whiteDot
     for(i <- redDots.indices) {
-      points(i*3+1) = locate(lastPoint, redDots)
+      points(i*3+1) = V2D.locate(lastPoint, redDots.toVector)
       lastPoint = points(i*3+1)
-      points(i*3+2) = locate(lastPoint, greenDots)
+      points(i*3+2) = V2D.locate(lastPoint, greenDots.toVector)
       lastPoint = points(i*3+2)
-      points(i*3+3) = locate(lastPoint, blueDots)
+      points(i*3+3) = V2D.locate(lastPoint, blueDots.toVector)
       lastPoint = points(i*3+3)
     }
 

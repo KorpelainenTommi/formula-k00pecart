@@ -86,6 +86,8 @@ object Track extends Serializer[Track] {
   val MAX_LEADERBOARD = 6
   val TRACK_WIDTH = 256
   val TRACK_HEIGHT = 256
+  val NAME_MAX_LENGTH = 12
+  val CREATOR_MAX_LENGTH = 11
 
   def loadHeader(bytes: Array[Byte], start: Int): (Track, Int) = {
 
@@ -107,9 +109,10 @@ object Track extends Serializer[Track] {
       idx += descData._2
       (t, descData._1)
     })
-    val trc = new Track(nameData._1, descriptionData._1, creatorData._1, version)
+    val trc = new Track(nameData._1, descriptionData._1, creatorData._1, version = version)
     trc._fastestTimes = fastestTimes.toVector
     trc._roadBytes = Some(bytes.slice(idx, idx+Track.TRACK_WIDTH*Track.TRACK_HEIGHT/8))
+    idx += Track.TRACK_WIDTH*TRACK_HEIGHT/8
     trc.createPreviewImage()
     (trc, idx)
   }
@@ -119,6 +122,10 @@ object Track extends Serializer[Track] {
     val track = trackHeader._1
     var idx = trackHeader._2
     track.initializeRoad()
+    track._roadWidth = FormulaIO.loadDouble(bytes, idx)
+    idx += 8
+    track._primaryPath = ClosedPath.load(bytes, idx).toClosedLoop
+    idx += track.primaryPath.length * 16 + 4
     track
   }
 
@@ -127,14 +134,20 @@ object Track extends Serializer[Track] {
     val headerBytes = TrackPreview.save(saveable)
     saveable.serializeRoad()
     val roadBytes = saveable._roadBytes.get
-    headerBytes ++ roadBytes
+    headerBytes ++
+    roadBytes ++
+    FormulaIO.saveDouble(saveable.roadWidth) ++
+    ClosedPath.save(saveable.primaryPath)
   }
 }
 
 
-class Track(trackName: String, description: String = "", creator: String = "Unknown", version: Byte = 0) extends TrackPreview(trackName, description, creator, version) {
+class Track(trackName: String, description: String = "", creator: String = "Unknown", protected var _roadWidth: Double = 25D, version: Byte = 0) extends TrackPreview(trackName, description, creator, version) {
 
+  private var _primaryPath = new ClosedLoop(Vector())
   private var _road = BitSet()
+
+
   def road(point: V2D): Boolean = {
     road(math.round(point.x).toInt, math.round(point.y).toInt)
   }
@@ -143,10 +156,20 @@ class Track(trackName: String, description: String = "", creator: String = "Unkn
     _road(x+y*Track.TRACK_WIDTH)
   }
 
-  //TODO: DEBUG
-  def writeRoad(x: Int, y: Int) = {
-    _road += (x+y*Track.TRACK_WIDTH)
+  def primaryPath = _primaryPath
+  def roadWidth = _roadWidth
+
+  def rewriteRoad(roadPixels: BufferedImage, roadPath: ClosedLoop) = {
+
+    _primaryPath = roadPath
+    _road.clear()
+
+    val data = roadPixels.getRaster.getDataElements(0, 0, Track.TRACK_WIDTH, Track.TRACK_HEIGHT, null).asInstanceOf[Array[Int]]
+    for(i <- 0 until (Track.TRACK_WIDTH*Track.TRACK_HEIGHT)) {
+      if(data(i) == 0xFF000000) _road.add(i)
+    }
   }
+
 
   protected def initializeRoad() = {
 
@@ -185,7 +208,4 @@ class Track(trackName: String, description: String = "", creator: String = "Unkn
     }))
 
   }
-
-
-
 }

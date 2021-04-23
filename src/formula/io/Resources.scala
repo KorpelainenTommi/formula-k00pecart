@@ -46,6 +46,8 @@ object Textures extends Resource {
   val Gear4 = Value
   val Gear5 = Value
 
+  val Explosion = Value
+
   val Background_Mainmenu = Value
   val Background_Generic = Value
 
@@ -60,7 +62,7 @@ object Textures extends Resource {
     CarOrangeBack, CarOrangeTurnLeft, CarOrangeTurnRight,
     CarOrangeLeft, CarOrangeRight, CarOrangeLeftFront, CarOrangeRightFront, CarOrangeFront)
 
-  val GAME_TEXTURES = TRACK_TEXTURES ++ CAR_RED_TEXTURES ++ CAR_ORANGE_TEXTURES ++ HUD_TEXTURES
+  val GAME_TEXTURES = TRACK_TEXTURES ++ CAR_RED_TEXTURES ++ CAR_ORANGE_TEXTURES ++ HUD_TEXTURES :+ Explosion
 
   private def fold(parts: String*) = FormulaIO.resolveNameS(parts)
   def path(t: Texture) = {
@@ -100,6 +102,8 @@ object Textures extends Resource {
       case Gear3 => fold("hud", "gear3.png")
       case Gear4 => fold("hud", "gear4.png")
       case Gear5 => fold("hud", "gear5.png")
+
+      case Explosion => fold("")
     }
   }
 }

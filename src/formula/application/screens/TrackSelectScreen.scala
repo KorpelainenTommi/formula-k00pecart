@@ -37,6 +37,7 @@ class TrackSelectScreen(val purpose: TrackSelectScreen.Mode = TrackSelectScreen.
     backButton.percentPosition = (0.8, 0.85)
     components += backButton
 
+
     val trackPreview = new TrackPreviewPanel
     trackPreview.percentBounds = (0.55, 0.1, 0.4, 0.7)
     components += trackPreview
@@ -49,17 +50,6 @@ class TrackSelectScreen(val purpose: TrackSelectScreen.Mode = TrackSelectScreen.
 
 
     if(purpose == TrackSelectScreen.TrackTool) {
-
-      val editButton = new GrayButton("Edit", () => {
-        if(trackImages.selectedIndex != -1) {
-
-        }
-        else {
-          MainApplication.messageBox("Select a track first")
-        }
-      })
-      editButton.percentPosition = (0.25, 0.85)
-      components += editButton
 
       val newButton = new GrayButton("New track", () => { MainApplication.transition(new TrackToolScreen) })
       newButton.percentPosition = (0.05, 0.85)
@@ -82,7 +72,7 @@ class TrackSelectScreen(val purpose: TrackSelectScreen.Mode = TrackSelectScreen.
           MainApplication.messageBox("Select a track first")
         }
       })
-      deleteButton.percentPosition = (0.45, 0.85)
+      deleteButton.percentPosition = (0.25, 0.85)
       components += deleteButton
     }
 

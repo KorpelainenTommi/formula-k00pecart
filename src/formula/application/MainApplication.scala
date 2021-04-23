@@ -6,6 +6,7 @@ import formula.io.Settings
 
 import java.awt.KeyboardFocusManager
 import java.awt.event.WindowEvent
+import javax.sound.sampled.FloatControl
 import javax.swing._
 
 
@@ -129,9 +130,27 @@ object MainApplication extends App {
     false
   })
 
-  FormulaIO.saveTrack(new formula.engine.Track("AA"))
 
+  /* Sample code for adding audio system later
 
+  protected var clip: Option[javax.sound.sampled.Clip] = None
+
+  def testMusic() = {
+
+    val strm = javax.sound.sampled.AudioSystem.getAudioInputStream(new java.io.File(FormulaIO.resolvePath("data", "drivin.wav")))
+    clip = Some(javax.sound.sampled.AudioSystem.getClip)
+    clip.get.open(strm)
+    val control = clip.get.getControl(javax.sound.sampled.FloatControl.Type.MASTER_GAIN).asInstanceOf[FloatControl]
+    control.setValue(-25.0F)
+    clip.get.start()
+
+  }
+
+  def stopMusic() = {
+    clip.foreach(_.stop())
+  }
+
+  */
 
   /*
   val bufImg = javax.imageio.ImageIO.read(new java.io.File(FormulaIO.resolvePath("data", "textures", "goal0.png")))

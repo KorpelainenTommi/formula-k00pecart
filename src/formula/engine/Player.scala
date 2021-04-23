@@ -1,4 +1,5 @@
 package formula.engine
+import java.awt.image.BufferedImage
 import formula.io._
 
 object Player {
@@ -16,20 +17,34 @@ class Player(val game: Game, initialPosition: V2D, initialDirection: V2D, val pl
 
   private val carTextures = if(playerNumber == 0) Textures.CAR_RED_TEXTURES else Textures.CAR_ORANGE_TEXTURES
 
+  protected val checkpointSqrDist = game.track.roadWidth * game.track.roadWidth
   protected var _turnMult = 0D
   protected var _gear = 0
+  protected var _lap = 1
+  protected var _lastCheckpoint = 0
   protected var _position = initialPosition
   protected var _direction = initialDirection
+  var hidden = false
+  var active = false
 
   def gear = _gear
   def turnMult = _turnMult
+  def lap = _lap
+
+  protected def lap_=(value: Int) = {
+    if(value < 1) _lap = 1
+    else {
+      _lap = value
+      if(_lap > game.nOfLaps) {
+        game.victory(playerNumber)
+      }
+    }
+  }
 
   protected def gear_=(value: Int) = {
     _gear = value
     _turnMult = calculateTurnMult
   }
-
-
 
   protected def calculateTurnMult: Double = {
     if(gear == 0) 0D
@@ -54,30 +69,37 @@ class Player(val game: Game, initialPosition: V2D, initialDirection: V2D, val pl
   }
 
   def dirTexture(lookingDirection: V2D, perpendicular: V2D) = {
-    val dotP = direction dot lookingDirection
-    val dotPerp = direction dot perpendicular
 
-    if(dotP > 0.85) {
-      texture
-    }
-
-    else if(dotP > 0.5) {
-      if(dotPerp >= 0) carTextures(2)
-      else carTextures(1)
-    }
-
-    else if(dotP > -0.5) {
-      if(dotPerp >= 0) carTextures(4)
-      else carTextures(3)
-    }
-
-    else if(dotP > -0.85) {
-      if(dotPerp >= 0) carTextures(6)
-      else carTextures(5)
+    if(hidden) {
+      None
     }
 
     else {
-      carTextures(7)
+      val dotP = direction dot lookingDirection
+      val dotPerp = direction dot perpendicular
+
+      if(dotP > 0.85) {
+        Some(texture)
+      }
+
+      else if(dotP > 0.5) {
+        if(dotPerp >= 0) Some(carTextures(2))
+        else Some(carTextures(1))
+      }
+
+      else if(dotP > -0.5) {
+        if(dotPerp >= 0) Some(carTextures(4))
+        else Some(carTextures(3))
+      }
+
+      else if(dotP > -0.85) {
+        if(dotPerp >= 0) Some(carTextures(6))
+        else Some(carTextures(5))
+      }
+
+      else {
+        Some(carTextures(7))
+      }
     }
   }
 
@@ -87,7 +109,7 @@ class Player(val game: Game, initialPosition: V2D, initialDirection: V2D, val pl
   }
 
   protected val _camera = new Camera
-  _camera.position = initialPosition
+  _camera.position = initialPosition - initialDirection * Player.CAMERA_DISTANCE
   def camera = _camera
 
   protected var lastGearShift = game.startTime
@@ -95,34 +117,63 @@ class Player(val game: Game, initialPosition: V2D, initialDirection: V2D, val pl
 
   def update(time: Long, deltaT: Double) = {
 
-    if((time - lastGearShift) / Game.TIME_PRECISION > Player.GEAR_SHIFT_COOLDOWN) {
-      if(gearUp) {
-        gear += 1
-        if(gear > Player.MAX_GEAR) gear = Player.MAX_GEAR
-        lastGearShift = time
+    if(active) {
+      if((time - lastGearShift) / Game.TIME_PRECISION > Player.GEAR_SHIFT_COOLDOWN) {
+        if(gearUp) {
+          gear += 1
+          if(gear > Player.MAX_GEAR) gear = Player.MAX_GEAR
+          lastGearShift = time
+        }
+        else if(gearDown) {
+          gear -= 1
+          if(gear < -1) gear = -1
+          lastGearShift = time
+        }
       }
-      else if(gearDown) {
-        gear -= 1
-        if(gear < -1) gear = -1
-        lastGearShift = time
+
+      if(turnLeft) {
+        _direction = _direction.rotDeg(-(Player.TURN_RATE * turnMult) * deltaT).normalized
       }
-    }
 
-    if(turnLeft) {
-      _direction = _direction.rotDeg(-(Player.TURN_RATE * turnMult) * deltaT).normalized
-    }
+      if(turnRight) {
+        _direction = _direction.rotDeg(turnMult * Player.TURN_RATE * deltaT).normalized
+      }
 
-    if(turnRight) {
-      _direction = _direction.rotDeg(turnMult * Player.TURN_RATE * deltaT).normalized
-    }
 
-    val velocity = direction * Player.BASE_SPEED * deltaT * gear
-    val newPosition = position + velocity
-    _position = V2D(math.min(math.max(newPosition.x, 0), Track.TRACK_WIDTH), math.min(math.max(newPosition.y, 0), Track.TRACK_HEIGHT))
+      val velocity = direction * Player.BASE_SPEED * deltaT * gear
+      val newPosition = position + velocity
+      _position = V2D(math.min(math.max(newPosition.x, 0), Track.TRACK_WIDTH), math.min(math.max(newPosition.y, 0), Track.TRACK_HEIGHT))
+    }
 
     _camera.position = _position - direction * Player.CAMERA_DISTANCE
     _camera.scanVector = direction
 
+
+    if(!game.track.road(_position)) {
+      hidden = true
+    }
+
+    else {
+      hidden = false
+
+
+      val checkpoint = V2D.locateIndex(_position, game.track.primaryPath)
+      if(_lastCheckpoint + 1 == checkpoint && game.track.primaryPath(checkpoint).distSqr(_position) <= checkpointSqrDist) {
+        _lastCheckpoint = checkpoint
+
+      }
+
+      if(_lastCheckpoint == game.track.primaryPath.length - 1) {
+
+        val goalDir = game.track.primaryPath.direction(0)
+        val goalPerp = game.track.primaryPath.perpendicular(0)
+        val coords = V2D.changeBasis(_position, game.track.primaryPath(0), goalPerp, goalDir)
+        if(coords.y >= 0) {
+          _lastCheckpoint = 0
+          lap += 1
+        }
+      }
+    }
   }
 
 

@@ -36,11 +36,11 @@ class PlayerRenderTarget(private val players: Vector[Player], private val camera
 
       val playerTexture = r._1.dirTexture(camera.scanVector.normalized, camera.scanPerpendicular)
 
-      g.drawImage(FormulaIO.getTexture(playerTexture),
+      playerTexture.foreach(tex => g.drawImage(FormulaIO.getTexture(tex),
         math.round(absoluteBounds.x + absoluteBounds.width * x).toInt,
         math.round(absoluteBounds.y + absoluteBounds.height * (y - h)).toInt,
         math.round(absoluteBounds.width * w).toInt,
-        math.round(absoluteBounds.height * h).toInt, null)
+        math.round(absoluteBounds.height * h).toInt, null))
       })
     })
   }

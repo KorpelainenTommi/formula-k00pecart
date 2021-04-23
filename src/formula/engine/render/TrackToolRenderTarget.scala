@@ -8,8 +8,10 @@ class TrackToolRenderTarget(val tool: TrackTool) extends RenderTarget {
 
   private val COLOR_DRAWTRACK_INVALID = new Color(255, 0, 0, 100)
   private val COLOR_DRAWTRACK_VALID = new Color(0, 0, 255, 100)
+  private val COLOR_HIGHLIGHT = new Color(255, 120, 0, 120)
   private val COLOR_GOAL = new Color(255, 120, 0, 255)
   private val COLOR_PATH = new Color(255, 255, 0, 100)
+  private val COLOR_DIR  = new Color(0, 255, 0, 255)
 
   private def drawCircle(pos: V2D, diameter: Double, g: Graphics2D) = {
     val d = diameter / Track.TRACK_WIDTH
@@ -18,6 +20,26 @@ class TrackToolRenderTarget(val tool: TrackTool) extends RenderTarget {
       math.round(absoluteBounds.y + (pos.y - 0.5 * d) * absoluteBounds.height).toInt,
       math.round(absoluteBounds.width*d).toInt,
       math.round(absoluteBounds.height*d).toInt)
+  }
+
+  private def drawArrow(from: V2D, to: V2D, g: Graphics2D) = {
+
+    val x1 = math.round(absoluteBounds.x + from.x * absoluteBounds.width).toInt
+    val y1 = math.round(absoluteBounds.y + from.y * absoluteBounds.height).toInt
+    val x2 = math.round(absoluteBounds.x + to.x * absoluteBounds.width).toInt
+    val y2 = math.round(absoluteBounds.y + to.y * absoluteBounds.height).toInt
+    g.drawLine(x1, y1, x2, y2)
+
+    val ding1 = to + (from - to).rotDeg(45) * 0.25
+    val ding2 = to + (from - to).rotDeg(-45) * 0.25
+
+    val dx1 = math.round(absoluteBounds.x + ding1.x * absoluteBounds.width).toInt
+    val dy1 = math.round(absoluteBounds.y + ding1.y * absoluteBounds.height).toInt
+    val dx2 = math.round(absoluteBounds.x + ding2.x * absoluteBounds.width).toInt
+    val dy2 = math.round(absoluteBounds.y + ding2.y * absoluteBounds.height).toInt
+
+    g.drawLine(x2, y2, dx1, dy1)
+    g.drawLine(x2, y2, dx2, dy2)
   }
 
 
@@ -34,12 +56,30 @@ class TrackToolRenderTarget(val tool: TrackTool) extends RenderTarget {
       drawCircle(tool.mousePosition, tool.roadWidth, g)
     }
 
+    if(tool.mode == TrackTool.PlaceGoal && tool.pathPositions.nonEmpty) {
+
+      val pos = V2D(tool.mousePosition.x * Track.TRACK_WIDTH, tool.mousePosition.y * Track.TRACK_HEIGHT)
+      val highlightPoint = V2D.locate(pos, tool.pathPositions)
+      if((pos distSqr highlightPoint) <= TrackTool.PATH_POSITION_DIST_SQR) {
+        g.setColor(COLOR_GOAL)
+        drawCircle(V2D(highlightPoint.x / Track.TRACK_WIDTH, highlightPoint.y / Track.TRACK_HEIGHT), 5, g)
+      }
+    }
+
 
 
     g.setColor(COLOR_GOAL)
     tool.goalPosition.foreach(p => {
       drawCircle(V2D(p.x / Track.TRACK_WIDTH, p.y / Track.TRACK_HEIGHT), 5, g)
     })
+
+    if(tool.roadCompleted && tool.pathPositions.nonEmpty) {
+      g.setColor(COLOR_DIR)
+      g.setStroke(new BasicStroke(2))
+      val pos1 = V2D(tool.pathPositions(0).x / Track.TRACK_WIDTH, tool.pathPositions(0).y / Track.TRACK_HEIGHT)
+      val pos2 = V2D(tool.pathPositions(1).x / Track.TRACK_WIDTH, tool.pathPositions(1).y / Track.TRACK_HEIGHT)
+      drawArrow(pos1, pos2, g)
+    }
 
     g.setColor(COLOR_PATH)
     tool.pathPositions.foreach(p => {

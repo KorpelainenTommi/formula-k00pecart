@@ -75,6 +75,26 @@ import formula.io._
       V2D((yDir.y * dx - yDir.x * dy) / d, (-xDir.y * dx + xDir.x * dy)/d)
     }
 
+    def locateIndex(point: V2D, points: IndexedSeq[V2D]) = {
+      var closest, i = 0
+      var sqrD, dist = Double.PositiveInfinity
+      while(i < points.length) {
+        sqrD = point distSqr points(i)
+          if(sqrD < dist) {
+            dist = sqrD
+            closest = i
+          }
+        i += 1
+      }
+      closest
+    }
+
+    def locate(point: V2D, points: IndexedSeq[V2D]) = {
+      points(V2D.locateIndex(point, points))
+    }
+
+
+
     override def save(saveable: V2D): Array[Byte] = FormulaIO.saveDouble(saveable.x) ++ FormulaIO.saveDouble(saveable.y)
     override def load(bytes: Array[Byte], start: Int): V2D = V2D(FormulaIO.loadDouble(bytes, start), FormulaIO.loadDouble(bytes, start+8))
 

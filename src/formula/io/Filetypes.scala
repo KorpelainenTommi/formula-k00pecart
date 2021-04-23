@@ -13,7 +13,7 @@ trait Serializer[T] {
   def load(bytes: Array[Byte]): T = load(bytes, 0)
 }
 
-case class Settings(resolution: Int, fullScreen: Boolean, player1Controls: Array[Int], player2Controls: Array[Int]) {
+case class Settings(resolution: Int, fullScreen: Boolean, player1Controls: Array[Int], player2Controls: Array[Int], targetFramerate: Int) {
   def screenSize = Settings.resolutions(if(resolution < 0 || resolution >= Settings.resolutions.length) 0 else resolution)
 }
 
@@ -82,15 +82,16 @@ object Settings extends Serializer[Settings] {
   val defaultPlayer1Controls = Array(KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_W, KeyEvent.VK_S)
   val defaultPlayer2Controls = Array(KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_UP, KeyEvent.VK_DOWN)
 
-  def defaultSettings = Settings(0, false, defaultPlayer1Controls, defaultPlayer2Controls)
+  def defaultSettings = Settings(0, false, defaultPlayer1Controls, defaultPlayer2Controls, 150)
   override def save(saveable: Settings) = {
     Array[Byte](if(saveable.fullScreen) 1 else 0) ++
     FormulaIO.saveInt(saveable.resolution) ++
     saveable.player1Controls.flatMap(FormulaIO.saveInt(_)) ++
-    saveable.player2Controls.flatMap(FormulaIO.saveInt(_))
+    saveable.player2Controls.flatMap(FormulaIO.saveInt(_)) ++
+    FormulaIO.saveInt(saveable.targetFramerate)
   }
   override def load(bytes: Array[Byte], start: Int) = {
-    if(bytes.length < start + 5 + defaultPlayer1Controls.length*4 + defaultPlayer2Controls.length*4) {
+    if(bytes.length < start + 9 + defaultPlayer1Controls.length*4 + defaultPlayer2Controls.length*4) {
       defaultSettings
     }
 
@@ -109,8 +110,11 @@ object Settings extends Serializer[Settings] {
         idx += 4
         keycode
       })
+      var targetFramerate = FormulaIO.loadInt(bytes, idx)
+      idx += 4
+      if(targetFramerate <= 0) targetFramerate = defaultSettings.targetFramerate
 
-      Settings(if(resolution<0 || resolution>resolutions.length-1) 0 else resolution, fullScreen, player1Controls, player2Controls)
+      Settings(if(resolution<0 || resolution>resolutions.length-1) 0 else resolution, fullScreen, player1Controls, player2Controls, targetFramerate)
     }
   }
 }

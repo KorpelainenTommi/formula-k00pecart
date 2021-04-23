@@ -91,6 +91,8 @@ package formula.application {
     this.setForeground(fontColor)
     def text = this.getText
     def text_=(value: String) = this.setText(value)
+
+    this.percentSize = (GUIConstants.TEXTFIELD_WIDTH, GUIConstants.TEXTFIELD_HEIGHT)
   }
 
   class CheckBox extends JCheckBox with ComponentPercentBounds {
@@ -105,7 +107,7 @@ package formula.application {
    val minorSpacing: Int = 1,
    val majorSpacing: Int = 5,
    protected var onchange: Int => Unit = _ => ())
-   extends JSlider(if(isVertical) SwingConstants.VERTICAL else SwingConstants.HORIZONTAL, minValue, maxValue, (maxValue-minValue) / 2) with ComponentPercentBounds {
+   extends JSlider(if(isVertical) SwingConstants.VERTICAL else SwingConstants.HORIZONTAL, minValue, maxValue, minValue + (maxValue-minValue) / 2) with ComponentPercentBounds {
     override def component = this
     this.setMinorTickSpacing(minorSpacing)
     this.setMajorTickSpacing(majorSpacing)
@@ -190,7 +192,7 @@ package formula.application {
   }
 
   class TextInput
-  (txt: String,
+  (txt: String = "",
   val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT,
   val color: Color = GUIConstants.COLOR_FONT)
   extends JTextField(1) with TextPercentBounds {
@@ -204,7 +206,7 @@ package formula.application {
   }
 
   class TextArea
-  (txt: String,
+  (txt: String = "",
   val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT,
   val color: Color = GUIConstants.COLOR_FONT,
   protected val textArea: JTextArea = new JTextArea)
@@ -226,6 +228,9 @@ package formula.application {
       super.updateBounds(width, height)
       textArea.setFont(FormulaIO.getFont(textFont).deriveFont((fontSize * width * GUIConstants.FONT_SIZE).toFloat))
     }
+
+    def getText = textArea.getText
+
   }
 
   class DropDown

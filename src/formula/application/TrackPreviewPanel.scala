@@ -1,7 +1,7 @@
 package formula.application
 import javax.swing._
-import formula.engine.{Track, TrackPreview}
-import java.awt.Graphics
+import java.awt._
+import formula.engine._
 import java.awt.image.BufferedImage
 class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
   this.setLayout(null)
@@ -9,6 +9,7 @@ class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
 
   override def paintComponent(g: Graphics) = {
     super.paintComponent(g)
+
     if(previewImage.isDefined) {
       val bounds = g.getClipBounds
       g.setColor(java.awt.Color.DARK_GRAY)
@@ -26,6 +27,7 @@ class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
         g.drawImage(img, iconX+border, iconY+border, iconW-2*border, iconH-2*border, null)
       })
     }
+
     //g.fillRect((bounds.x+0.05*bounds.width).toInt, (bounds.y+0.05*bounds.height).toInt, (0.28*bounds.width).toInt, (0.28*bounds.width).toInt)
   }
 

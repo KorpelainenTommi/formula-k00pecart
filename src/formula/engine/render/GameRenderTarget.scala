@@ -1,6 +1,6 @@
 package formula.engine.render
 import formula.engine._
-import formula.application.MainApplication
+import formula.application.{GUIConstants, MainApplication}
 import formula.io._
 
 import java.awt._
@@ -13,7 +13,7 @@ class GameRenderTarget(val game: Game, playerNumber: Int) extends RenderTarget {
   grass.percentSize = (1, 0.68)
   subTargets += grass
 
-  private val road = new RoadRenderTarget(playerCamera)
+  private val road = new RoadRenderTarget(playerCamera, game.track)
   road.percentBounds = (0, 0, 1, 1)
   subTargets += road
 
@@ -34,9 +34,22 @@ class GameRenderTarget(val game: Game, playerNumber: Int) extends RenderTarget {
   protected val gearSize = 0.12
   subTargets += playerGear
 
-  val gearText = new TextRenderTarget("GEAR", fontSize = 28, fontColor = Color.BLACK)
-  protected val gearTextHeight = 0.06
+  val gearText = new TextRenderTarget("GEAR", fontSize = 26, fontColor = Color.BLACK)
+  protected val gearTextHeight = 0.08
   subTargets += gearText
+
+  val mainText = new InfoRenderTarget(fontsize = 7, infoFunction = () => game.screenText(playerNumber))
+  mainText.percentBounds = (0.1, 0.25, 0.8, 0.2)
+  subTargets += mainText
+
+  val timeText = new InfoRenderTarget(textfont = Fonts.TimesNewRoman, fontsize = 10, infoFunction = () => game.clockTime)
+  timeText.percentBounds = (0.3, 0.025, 0.4, 0.1)
+  subTargets += timeText
+
+  val lapText = new InfoRenderTarget(textfont = Fonts.TimesNewRoman, fontsize = 6, fontcolor = Color.BLACK, infoFunction = () => game.lap(playerNumber))
+  lapText.percentBounds = (0.3, 0.1, 0.4, 0.1)
+  subTargets += lapText
+
 
   override protected def personalRender(g: Graphics2D): Unit = { }
 

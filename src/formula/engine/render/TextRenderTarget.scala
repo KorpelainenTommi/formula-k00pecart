@@ -2,6 +2,7 @@ package formula.engine.render
 import formula.application.GUIConstants
 import formula.engine._
 import formula.io._
+import java.awt.font.LineMetrics
 import java.awt._
 
 class TextRenderTarget
@@ -11,7 +12,7 @@ class TextRenderTarget
  val fontColor: Color = GUIConstants.COLOR_FONT)
  extends RenderTarget {
 
-  private var font: Option[Font] = None
+  protected var font: Option[Font] = None
 
   override def updateBounds(width: Double, height: Double, xOffset: Int, yOffset: Int): Unit = {
     super.updateBounds(width, height, xOffset, yOffset)
@@ -22,7 +23,9 @@ class TextRenderTarget
     font.foreach(f => {
       g.setFont(f)
       g.setColor(fontColor)
-      g.drawString(text, absoluteBounds.x, absoluteBounds.y + absoluteBounds.height)
+      val w = g.getFontMetrics.stringWidth(text)
+      val h = g.getFontMetrics.getDescent
+      g.drawString(text, math.round(absoluteBounds.x + 0.5 * (absoluteBounds.width - w)).toInt, absoluteBounds.y + absoluteBounds.height - h)
     })
   }
 }
