@@ -6,18 +6,25 @@ import formula.engine._
 import formula.io._
 
 
-class GameScreen(track: Track) extends Screen with TextureLoader {
+class GameScreen
+(track: Track,
+ playerCount: Int,
+ laps: Int,
+ playerNames: Vector[String],
+ playerAI: Vector[Boolean]) extends Screen with TextureLoader {
 
   override protected def textures = Textures.GAME_TEXTURES
 
 
-  val game = new Game(track, 2, 3)
+  val game = new Game(track, playerCount, laps, playerNames, playerAI)
 
-  val mainRenderTarget = new BaseRenderTarget(() => game.gameUpdate())
+  //Create a splitscreen for game rendering
+  val mainRenderTarget = new SplitscreenRenderTarget(() => game.gameUpdate())
   mainRenderTarget.percentBounds = (0, 0, 1, 1)
   for(i <- 0 until game.nOfPlayers) {
     mainRenderTarget.addSubTarget(new GameRenderTarget(game, i))
   }
+
 
   val _panel = new RenderPanel(mainRenderTarget)
   override def panel = _panel

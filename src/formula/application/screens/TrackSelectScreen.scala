@@ -28,7 +28,8 @@ class TrackSelectScreen(val purpose: TrackSelectScreen.Mode = TrackSelectScreen.
 
   protected override def createComponents(): Unit = {
 
-    val screenTitle = new FontLabel("Select a track", fontSize = 2F)
+
+    val screenTitle = new FontLabel(if(purpose == TrackSelectScreen.Race) "Select a track" else "Existing tracks", fontSize = 2F, fontColor = GUIConstants.COLOR_HEADER2)
     screenTitle.percentSize = (GUIConstants.TEXTFIELD_WIDTH*2, GUIConstants.TEXTFIELD_HEIGHT*1.5)
     screenTitle.percentPosition = (0.05, 0.025)
     components += screenTitle
@@ -78,12 +79,10 @@ class TrackSelectScreen(val purpose: TrackSelectScreen.Mode = TrackSelectScreen.
 
     if(purpose == TrackSelectScreen.Race) {
       val raceButton = new GrayButton("Select track", () => {
-        //Transition to player naming
-        //For now, directly go to gamescreen
         if(trackImages.selectedIndex != -1) {
           val track = FormulaIO.loadTrack(trackfileNames(trackImages.selectedIndex))
           if(track.isEmpty) MainApplication.messageBox("Error loading selected track")
-          else MainApplication.transition(new GameScreen(track.get))
+          else MainApplication.transition(new PlayerNamingScreen(track.get))
         }
         else {
           MainApplication.messageBox("Select a track first")

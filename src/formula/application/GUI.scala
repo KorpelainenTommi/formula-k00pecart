@@ -209,6 +209,7 @@ package formula.application {
   (txt: String = "",
   val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT,
   val color: Color = GUIConstants.COLOR_FONT,
+  val editable: Boolean = true,
   protected val textArea: JTextArea = new JTextArea)
   extends JScrollPane(textArea) with ComponentPercentBounds {
 
@@ -217,6 +218,7 @@ package formula.application {
     textArea.setForeground(color)
     textArea.setLineWrap(true)
     textArea.setText(txt)
+    textArea.setEditable(editable)
 
     this.getVerticalScrollBar.setUI(new javax.swing.plaf.basic.BasicScrollBarUI(){
       override protected def configureScrollBarColors() = this.thumbColor = GUIConstants.COLOR_SCROLLBAR

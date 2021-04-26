@@ -1,28 +1,45 @@
 package formula.io
 import java.io._
-import javax.imageio._
-import java.nio.{ByteBuffer, ByteOrder}
-import java.awt.image.BufferedImage
-import scala.collection.mutable.HashMap
-import Textures.Texture
 import Fonts.Font
+import javax.imageio._
 import formula.engine._
+import Textures.Texture
+import java.awt.image.BufferedImage
+import java.nio.{ByteBuffer, ByteOrder}
+import scala.collection.mutable.HashMap
 import formula.application.MainApplication
 
+/** Main object for the game's IO system. Wraps up common serialization/deserialization
+ * for primitive types like Int, Double, and String, abstracts loading tracks, and resources
+ * parses paths.
+ */
 object FormulaIO {
 
+  class ResourceLoadException(val resourcePath: String)
+    extends Exception(s"No resource at path $resourcePath could be loaded")
+
+
+  //Using absolute filepaths instead of relative paths can give exceptions more clarity
+  //Current working directory
+  private val _cwd = java.nio.file.Paths.get("").toAbsolutePath.toString
+
+
   //Explicitly use little endian for cross platform compatibility of files
+  private val ENDIAN   = ByteOrder.LITTLE_ENDIAN
   private val ENCODING = java.nio.charset.StandardCharsets.UTF_16LE
-  private val ENDIAN = ByteOrder.LITTLE_ENDIAN
-  val STRING_SEP_CHAR = '\u00b6'
+
+
+  //Separate strings with a special unicode character when serializing
+  val STRING_SEP_CHAR  = '\u00b6'
   val STRING_SEP_BYTES = "\u00b6".getBytes(ENCODING)
-  class ResourceLoadException(val resourcePath: String) extends Exception(s"No resource at path $resourcePath could be loaded")
 
 
+  val loadedFonts    = HashMap[Font, java.awt.Font]()
   val loadedTextures = HashMap[Texture, BufferedImage]()
-  val loadedFonts = HashMap[Font, java.awt.Font]()
 
-  val missingTexture = {
+
+  val defaultFont = new javax.swing.JLabel().getFont
+  val defaultTexture = {
     val img = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
     val g = img.createGraphics()
     g.setColor(java.awt.Color.MAGENTA)
@@ -30,14 +47,12 @@ object FormulaIO {
     g.dispose()
     img
   }
-  val defaultFont = new javax.swing.JLabel().getFont
 
 
-  //Using absolute filepaths instead of relative paths gives debugging more clarity
-  private val _cwd = java.nio.file.Paths.get("").toAbsolutePath.toString
+
 
   /* resolvePath with variable length arguments is nice, but has downsides for overloading:
-  *  1. In order to be able to pass a Seq as an argument, the parameter type needs to Seq,
+  *  1. In order to be able to pass a Seq as an argument, the parameter type needs to be Seq,
   *  but Seq[String] and String* have the same type after type erasure, so these method signatures are
   *  identical after type erasure.
   *
@@ -61,66 +76,68 @@ object FormulaIO {
 
   def saveString(s: String) = (s.filter(_ != STRING_SEP_CHAR) + STRING_SEP_CHAR).getBytes(ENCODING)
   def loadString(buf: Array[Byte], offset: Int) = {
+
     //Step through memory until bytes corresponding to a STRING_SEP_CHAR are encountered
     var idx = offset
     while(idx+1 < buf.length && (buf(idx) != STRING_SEP_BYTES(0) || buf(idx+1) != STRING_SEP_BYTES(1))) {
       idx += 2
     }
+    def bytesToChar(bytes: Array[Byte]) = new String(bytes, ENCODING).toCharArray
     (bytesToChar(buf.slice(offset, idx)).mkString, (idx-offset) + 2)
+
   }
 
-  protected def bytesToChar(bytes: Array[Byte]) = {
-    new String(bytes, ENCODING).toCharArray
-  }
 
-  protected def saveFile(bytes: Array[Byte], fullpath: String) = {
+
+
+  private def saveFile(bytes: Array[Byte], fullpath: String) = {
+
     var outStream: Option[FileOutputStream] = None
-
     try {
       outStream = Some(new FileOutputStream(new File(fullpath)))
       outStream.get.write(bytes)
       true
     }
-
     catch {
       case _: FileNotFoundException | _: IOException => false
     }
-
     finally {
       outStream.foreach(_.close())
     }
+
   }
 
-  protected def loadFile(fullpath: String) = {
-    var inStream: Option[FileInputStream] = None
+  private def loadFile(fullpath: String) = {
 
+    var inStream: Option[FileInputStream] = None
     try {
       inStream = Some(new FileInputStream(new File(fullpath)))
       Some(inStream.get.readAllBytes())
     }
-
     catch {
       case _: FileNotFoundException | _: IOException => None
     }
-
     finally {
       inStream.foreach(_.close())
     }
+
   }
 
-  protected def deleteFile(fullpath: String) = {
+  private def deleteFile(fullpath: String) = {
+
     val f = new File(fullpath)
     if(!f.exists()) false
     else {
       try {
         f.delete()
       }
-
       catch {
         case _: IOException | _: java.lang.SecurityException => false
       }
     }
+
   }
+
 
 
 
@@ -136,20 +153,39 @@ object FormulaIO {
   }
 
 
+
+
   //Load an image, but don't cache it
-  def loadImage(name: String) = {
-    val path = resolvePath("data", "textures", name)
+  def loadImage(filename: String) = {
+
+    val path = resolvePath("data", "textures", filename)
     try {
       ImageIO.read(new File(path))
     }
-
     catch {
       case _: IOException => throw new ResourceLoadException(path)
     }
+
   }
+
+  def loadFont(filename: String) = {
+
+    val path = resolvePath("data", "fonts", filename)
+    try {
+      java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, new File(path))
+    }
+    catch {
+      case _: IOException | _: java.awt.FontFormatException => throw new ResourceLoadException(path)
+    }
+
+  }
+
+
+
 
   //Load a texture, and cache it for future access
   def getTexture(t: Texture) = {
+
     if(!loadedTextures.contains(t)) {
       try {
         loadedTextures(t) = loadImage(Textures.path(t))
@@ -157,11 +193,13 @@ object FormulaIO {
 
       catch {
         case e: ResourceLoadException => {
-          loadedTextures(t) = missingTexture
+          loadedTextures(t) = defaultTexture
           MainApplication.messageBox(e.getMessage)
         }
       }
+
     }
+
     loadedTextures(t)
   }
 
@@ -174,20 +212,27 @@ object FormulaIO {
   }
 
 
+
+
   def getFont(f: Font) = {
+
     if(!loadedFonts.contains(f)) {
       try {
-        loadedFonts(f) = java.awt.Font.createFont(java.awt.Font.TRUETYPE_FONT, new File(resolvePath("data", "fonts", Fonts.path(f))))
+        loadedFonts(f) = loadFont(Fonts.path(f))
       }
       catch {
-        case _: IOException | _: java.awt.FontFormatException => {
+        case e: ResourceLoadException => {
           loadedFonts(f) = defaultFont
-          MainApplication.messageBox(new ResourceLoadException(Fonts.path(f)).getMessage)
+          MainApplication.messageBox(e.getMessage)
         }
       }
     }
+
     loadedFonts(f)
   }
+
+
+
 
   def listTrackFiles = {
     val trackDir = new File(resolvePath("data", "tracks"))
@@ -211,6 +256,7 @@ object FormulaIO {
   def deleteTrack(filename: String) = {
     deleteFile(resolvePath("data", "tracks", filename))
   }
+
 
 
 
@@ -279,6 +325,5 @@ object FormulaIO {
     new ClosedLoop(points)
 
   }
-
 
 }

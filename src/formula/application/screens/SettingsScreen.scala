@@ -12,7 +12,7 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
 
   protected override def createComponents() = {
 
-    val screenLabel = new FontLabel("Settings", fontSize = 2)
+    val screenLabel = new FontLabel("Settings", fontSize = 2, fontColor = GUIConstants.COLOR_HEADER2)
     screenLabel.percentSize = (GUIConstants.TEXTFIELD_WIDTH, GUIConstants.TEXTFIELD_HEIGHT*2)
     screenLabel.percentPosition = (0.8, 0.05)
     components += screenLabel

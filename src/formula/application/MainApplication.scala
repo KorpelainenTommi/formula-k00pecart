@@ -130,7 +130,6 @@ object MainApplication extends App {
     false
   })
 
-
   /* Sample code for adding audio system later
 
   protected var clip: Option[javax.sound.sampled.Clip] = None

@@ -2,9 +2,13 @@ package formula.engine.render
 import formula.engine._
 import java.awt.Graphics2D
 
-class BaseRenderTarget(val onRenderComplete: () => Unit) extends RenderTarget {
+/** A RenderTarget that divides the space given to it
+ * evenly between its subtargets. Renders black bars between its
+ * subtargets
+ * @param onRenderComplete Callback function used for the game-render loop
+ */
+class SplitscreenRenderTarget(val onRenderComplete: () => Unit) extends RenderTarget {
 
-  private var cleaned = false
 
   override protected def personalRender(g: Graphics2D): Unit = {
     g.setColor(java.awt.Color.BLACK)
@@ -20,11 +24,13 @@ class BaseRenderTarget(val onRenderComplete: () => Unit) extends RenderTarget {
   def addSubTarget(t: RenderTarget) = {
     subTargets += t
 
+    //Single player
     if(subTargets.length == 1) {
       subTargets(0).percentPosition = (0.1, 0)
       subTargets(0).percentSize = (0.8, 1)
     }
 
+    //Splitscreen (2 or more)
     else {
       val d = 0.9875 / subTargets.length
       val offs = 0.0125 / (subTargets.length+1)

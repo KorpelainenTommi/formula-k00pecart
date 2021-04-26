@@ -3,6 +3,8 @@ import formula.application.GUIConstants
 import formula.io._
 import java.awt._
 
+//Render text that gets its value by calling the given function
+//Useful for presenting game stats like time, lap number etc.
 class InfoRenderTarget
 (textfont: Fonts.Font = GUIConstants.DEFAULT_FONT,
 fontsize: Float = 1F,

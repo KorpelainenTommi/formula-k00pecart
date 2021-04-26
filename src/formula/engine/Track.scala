@@ -1,14 +1,17 @@
 package formula.engine
-import scala.collection.mutable.BitSet
-import java.awt.image.BufferedImage
 import formula.io._
+import java.awt.image.BufferedImage
+import scala.collection.mutable.BitSet
+
 
 object TrackPreview extends Serializer[TrackPreview] {
+
   override def load(bytes: Array[Byte], start: Int): TrackPreview = {
     Track.loadHeader(bytes, start)._1
   }
 
   override def save(saveable: TrackPreview): Array[Byte] = {
+
     val fastestTimesArray = scala.collection.mutable.ArrayBuffer[Byte]()
     saveable.fastestTimes.foreach(time => {
       fastestTimesArray.appendAll(FormulaIO.saveInt(time._1))
@@ -21,13 +24,24 @@ object TrackPreview extends Serializer[TrackPreview] {
     FormulaIO.saveString(saveable.description) ++
     Array[Byte](saveable.fastestTimes.length.toByte) ++
     fastestTimesArray.toArray
+
   }
+
+
 }
 
-class TrackPreview(val trackName: String, val description: String = "", val creator: String = "Unknown", val version: Byte = 0) {
+
+class TrackPreview
+(val trackName: String,
+ val description: String = "",
+ val creator: String = "Unknown",
+ val version: Byte = 0) {
+
+
   protected var _roadBytes: Option[Array[Byte]] = None
-  protected var _previewImage: Option[BufferedImage]    = None
-  def previewImage = _previewImage.getOrElse(FormulaIO.missingTexture)
+  protected var _previewImage: Option[BufferedImage] = None
+  def previewImage = _previewImage.getOrElse(FormulaIO.defaultTexture)
+
 
   protected var _fastestTimes: Vector[(Int, String)] = Vector()
   def fastestTimes = _fastestTimes
@@ -36,7 +50,9 @@ class TrackPreview(val trackName: String, val description: String = "", val crea
     _fastestTimes = times.sortBy(_._1).take(Track.MAX_LEADERBOARD)
   }
 
+  //After the bytes representing the road are loaded, construct a preview image from them
   protected def createPreviewImage() = {
+
     _roadBytes.foreach(imageBytes => {
       _previewImage = Some(new BufferedImage(Track.TRACK_WIDTH, Track.TRACK_HEIGHT, BufferedImage.TYPE_INT_ARGB))
       val raster = _previewImage.get.getRaster
@@ -59,11 +75,24 @@ class TrackPreview(val trackName: String, val description: String = "", val crea
       //Set imagedata directly
       raster.setDataElements(0, 0, Track.TRACK_WIDTH, Track.TRACK_HEIGHT, pixels)
     })
+
   }
+
+
 }
+
 
 object Track extends Serializer[Track] {
 
+  val TRACK_WIDTH        = 256
+  val TRACK_HEIGHT       = 256
+
+  val MAX_LEADERBOARD    = 6
+  val NAME_MAX_LENGTH    = 12
+  val CREATOR_MAX_LENGTH = 11
+
+
+  //Give a string description of a time in the form "0:0:0.00 PlayerName"
   def describeTrackTime(time: (Int, String)) = {
 
     var t = time._1
@@ -81,14 +110,11 @@ object Track extends Serializer[Track] {
     if(hours > 9 || time._1 < 0) s"-:- ${time._2}"
     else if(hours > 0) s"$hours:$minuteString:$secondString.$centiString ${time._2}"
     else s"$minutes:$secondString.$centiString ${time._2}"
+
   }
 
-  val MAX_LEADERBOARD = 6
-  val TRACK_WIDTH = 256
-  val TRACK_HEIGHT = 256
-  val NAME_MAX_LENGTH = 12
-  val CREATOR_MAX_LENGTH = 11
 
+  //Load the header portion of a track file, also return the end index of the header
   def loadHeader(bytes: Array[Byte], start: Int): (Track, Int) = {
 
     var idx = start
@@ -115,9 +141,13 @@ object Track extends Serializer[Track] {
     idx += Track.TRACK_WIDTH*TRACK_HEIGHT/8
     trc.createPreviewImage()
     (trc, idx)
+
   }
 
+
+
   override def load(bytes: Array[Byte], start: Int): Track = {
+
     val trackHeader = loadHeader(bytes, start)
     val track = trackHeader._1
     var idx = trackHeader._2
@@ -127,6 +157,7 @@ object Track extends Serializer[Track] {
     track._primaryPath = ClosedPath.load(bytes, idx).toClosedLoop
     idx += track.primaryPath.length * 16 + 4
     track
+
   }
 
   override def save(saveable: Track): Array[Byte] = {
@@ -138,16 +169,32 @@ object Track extends Serializer[Track] {
     roadBytes ++
     FormulaIO.saveDouble(saveable.roadWidth) ++
     ClosedPath.save(saveable.primaryPath)
+
   }
+
+
 }
 
 
-class Track(trackName: String, description: String = "", creator: String = "Unknown", protected var _roadWidth: Double = 25D, version: Byte = 0) extends TrackPreview(trackName, description, creator, version) {
+
+
+class Track
+(trackName: String,
+ description: String = "",
+ creator: String = "Unknown",
+ protected var _roadWidth: Double = 25D,
+ version: Byte = 0)
+ extends TrackPreview(trackName, description, creator, version) {
+
 
   private var _primaryPath = new ClosedLoop(Vector())
   private var _road = BitSet()
 
+  def primaryPath = _primaryPath
+  def roadWidth = _roadWidth
 
+
+  //Check if a given position is on the road
   def road(point: V2D): Boolean = {
     road(math.round(point.x).toInt, math.round(point.y).toInt)
   }
@@ -156,9 +203,8 @@ class Track(trackName: String, description: String = "", creator: String = "Unkn
     _road(x+y*Track.TRACK_WIDTH)
   }
 
-  def primaryPath = _primaryPath
-  def roadWidth = _roadWidth
 
+  //Rewrite road data, mainly used by the track tool
   def rewriteRoad(roadPixels: BufferedImage, roadPath: ClosedLoop) = {
 
     _primaryPath = roadPath
@@ -168,9 +214,10 @@ class Track(trackName: String, description: String = "", creator: String = "Unkn
     for(i <- 0 until (Track.TRACK_WIDTH*Track.TRACK_HEIGHT)) {
       if(data(i) == 0xFF000000) _road.add(i)
     }
+
   }
 
-
+  //Populate the road bitset with data loaded from file
   protected def initializeRoad() = {
 
     _roadBytes.foreach(bytes => {
@@ -192,6 +239,8 @@ class Track(trackName: String, description: String = "", creator: String = "Unkn
 
   }
 
+
+  //Create the corresponding bytes for the current road bitset
   protected def serializeRoad() = {
 
     _roadBytes = Some(Array.tabulate[Byte](Track.TRACK_WIDTH*Track.TRACK_HEIGHT/8)(idx => {
@@ -208,4 +257,6 @@ class Track(trackName: String, description: String = "", creator: String = "Unkn
     }))
 
   }
+
+
 }

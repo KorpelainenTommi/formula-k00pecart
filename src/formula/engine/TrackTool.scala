@@ -1,7 +1,6 @@
 package formula.engine
 import java.awt._
 import formula.application._
-
 import java.awt.image.BufferedImage
 import scala.collection.mutable.ArrayBuffer
 

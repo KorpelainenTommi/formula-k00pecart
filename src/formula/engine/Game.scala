@@ -1,107 +1,181 @@
 package formula.engine
 import formula.io._
 import java.awt.Color
+import formula.application.MainApplication
+import formula.application.screens.ResultScreen
 
 object Game {
+
+  //TIME_PRECISION is the units per second for the high precision timer
+  //CLOCK_PRECISION is the units per second for the clock timer
 
   val TIME_PRECISION = 1000000000D
   val CLOCK_PRECISION = 1000000D
   val TARGET_FRAMETIME = 1D / formula.application.MainApplication.settings.targetFramerate
 
+  val GAME_COUNTDOWN = 2.4D
+
 }
 
-class Game(val track: Track, val nOfPlayers: Int, val nOfLaps: Int) {
 
+/** Represents a game, and offers access to the track and players in it
+ * handles updating players and rendering in a game loop
+ *
+ * @param track The track to race on
+ * @param nOfPlayers The number of players to spawn
+ * @param nOfLaps The number of laps to victory
+ */
+class Game
+(val track: Track,
+ val nOfPlayers: Int,
+ val nOfLaps: Int,
+ val playerNames: Vector[String] = Vector("Player 1", "Player 2"),
+ val playerAI: Vector[Boolean] = Vector(false, false)) {
+
+
+  //Player variables and methods
+
+  //List of booleans indicating the currently pressed keys
   private val player1Input = Array.fill[Boolean](Settings.defaultPlayer1Controls.length)(false)
   private val player2Input = Array.fill[Boolean](Settings.defaultPlayer2Controls.length)(false)
 
-  private val playerInput = Vector(player1Input, player2Input, player2Input)
-  val players = Vector.tabulate(nOfPlayers)(n => new Player(this,
-    track.primaryPath(0) - track.primaryPath.perpendicular(0) * track.roadWidth * 0.5 + track.primaryPath.perpendicular(0) * track.roadWidth * 0.25 * (n * 2 + 1),
-    track.primaryPath.directionNormalized(0), n))
-  val playerColors = Vector(Color.RED, Color.ORANGE, Color.GREEN)
+
+  val playerColors = Vector(Color.RED, Color.ORANGE)
+  private val playerInput = Vector(player1Input, player2Input)
+
+  val players = Vector.tabulate(nOfPlayers)(n => {
+
+    val goalPos = track.primaryPath(0)
+    val goalPerp = track.primaryPath.perpendicular(0)
+    val d = track.roadWidth / 2
+
+    if(playerAI.length > n && playerAI(n)) {
+      new ComputerPlayer(this,
+      goalPos - goalPerp * d + goalPerp * d * 0.5 * (n * 2 + 1), //Place players side by side on the goal line
+      track.primaryPath.directionNormalized(0), n)
+    }
+
+    else {
+      new Player(this,
+      goalPos - goalPerp * d + goalPerp * d * 0.5 * (n * 2 + 1), //Place players side by side on the goal line
+      track.primaryPath.directionNormalized(0), n)
+    }
+
+  })
+
+
+  //Read and write input booleans
+  def input(playerNumber: Int, inputNumber: Int) = {
+    playerInput(playerNumber)(inputNumber)
+  }
 
   def input(playerNumber: Int, inputNumber: Int, keyDown: Boolean) = {
     playerInput(playerNumber)(inputNumber) = keyDown
   }
 
-  def input(playerNumber: Int, inputNumber: Int) = {
-    playerInput(playerNumber)(inputNumber)
-  }
 
+
+
+
+  //Game timing and state
 
   private var _renderCallback = () => {}
 
-  private var lastFrameTime = 0L
+  private var _startTime     = 0L
+  private var _lastFrameTime = 0L
 
-  private var _startTime = 0L
-  private var _gameStarted = false
-  def gameStarted = _gameStarted
+  private var _gameStarted   = false
+  private var _clockStarted  = false
 
-  protected var _clockStarted = false
+
+  def time         = _lastFrameTime
+  def startTime    = _startTime
+  def clockTime    = if(clockStarted) Track.describeTrackTime((((time - startTime) / Game.CLOCK_PRECISION).toInt, "")) else "0:00.00"
+
+  def gameStarted  = _gameStarted
   def clockStarted = _clockStarted
 
-  def startTime = _startTime
-  def time = lastFrameTime
-  def clockTime = if(clockStarted) Track.describeTrackTime((((time - startTime) / Game.CLOCK_PRECISION).toInt, "")) else "0:00.00"
 
+
+
+
+  //Lap text for a player
+  def lap(playerNumber: Int) = s"Lap ${players(playerNumber).lap}/$nOfLaps"
+
+  //Information for each player (currently used for "Ready, set, go")
   def screenText(playerNumber: Int) = {
+
     val t = (time - startTime) / Game.TIME_PRECISION
 
     if(clockStarted) {
-      if(t > 1.2) ""
+      if(t > Game.GAME_COUNTDOWN / 2) ""
       else "GO"
     }
     else {
-      if(t > 1.2) "SET"
+      if(t > Game.GAME_COUNTDOWN / 2) "SET"
       else "READY"
     }
+
   }
 
-  def lap(playerNumber: Int) = s"Lap ${players(playerNumber).lap}/$nOfLaps"
 
 
+
+
+  //Begin rendering, and start the race countdown
   def beginGameLoop(renderCallback: () => Unit) = {
     _startTime = System.nanoTime()
-    lastFrameTime = _startTime
+    _lastFrameTime = _startTime
     _renderCallback = renderCallback
     _gameStarted = true
     gameUpdate()
   }
 
+
+
   def gameUpdate() = {
+
     if(gameStarted) {
       //Do game logic
 
       var time = System.nanoTime()
-      var elapsedTime = time - lastFrameTime
+      var elapsedTime = time - _lastFrameTime
 
+
+      //When we have achieved the target framerate,
+      //return CPU timeslices so the game doesn't hog processing
       while(elapsedTime / Game.TIME_PRECISION < Game.TARGET_FRAMETIME) {
-        //Release CPU slices so the game doesn't hog processing
         java.lang.Thread.`yield`()
         time = System.nanoTime()
-        elapsedTime = time - lastFrameTime
+        elapsedTime = time - _lastFrameTime
       }
 
-      lastFrameTime = time
-      //println(elapsedTime/Game.TIME_PRECISION)
 
+      //Player update
+      _lastFrameTime = time
       players.foreach(_.update(time, elapsedTime / Game.TIME_PRECISION))
 
-      if(!clockStarted && (time - startTime) / Game.TIME_PRECISION > 2.4) {
+
+      //Countdown over
+      //Activate the players and start the clock
+      if(!clockStarted && (time - startTime) / Game.TIME_PRECISION > Game.GAME_COUNTDOWN) {
         players.foreach(_.active = true)
         _startTime = time
         _clockStarted = true
       }
 
-      // render
+
+      //render
       _renderCallback()
     }
+
   }
 
-  def victory(playerNumber: Int) = {
-    players.filterNot(_.playerNumber == playerNumber).foreach(_.active = false)
 
+  def victory(playerNumber: Int) = {
+
+    players.filterNot(_.playerNumber == playerNumber).foreach(_.active = false)
+    MainApplication.transition(new ResultScreen(track, (((time - startTime) / Game.CLOCK_PRECISION).toInt, "")))
 
   }
 }
