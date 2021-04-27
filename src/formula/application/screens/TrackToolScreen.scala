@@ -33,6 +33,22 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
     components += trackWidthSlider
     trackTool.roadWidth = trackWidthSlider.getValue
 
+    val mapObjectName = new FontLabel("", fontColor = GUIConstants.COLOR_ACCENT)
+    mapObjectName.percentPosition = (0.45, 0.6)
+    components += mapObjectName
+
+
+    val mapObjects = MapObjects.objectIDList.map(MapObjects.createMapObject(_, V2D(0, 0)))
+    val mapObjectList = new ImageDisplayArea(mapObjects.map(obj => FormulaIO.getTexture(obj.texture)),
+      onSelect = ID => {
+        trackTool.selectedMapObject = ID
+        mapObjectName.setText(if(ID == -1) "" else mapObjects(ID).name)
+      })
+    mapObjectList.percentBounds = (0.45, 0.2, 0.25, 0.4)
+    components += mapObjectList
+
+
+
 
     val mouseAdapter = new MouseAdapter {
 
@@ -60,6 +76,16 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
         }
       }
 
+      override def mouseClicked(e: MouseEvent): Unit = {
+        if(trackTool.mode == TrackTool.PlaceObjects) {
+
+          if(e.getButton == MouseEvent.BUTTON1) trackTool.placeObject()
+          if(e.getButton == MouseEvent.BUTTON3) trackTool.removeObject()
+          renderPanel.repaint()
+
+        }
+      }
+
       override def mouseWheelMoved(e: MouseWheelEvent): Unit = {
         if(!trackTool.drawingTrack && (trackTool.mode == TrackTool.DrawRoad) && !trackTool.roadCompleted) {
           val units = e.getUnitsToScroll
@@ -80,6 +106,7 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
 
 
     def updateVisibleControls() = {
+
       if(trackTool.mode == TrackTool.DrawRoad) {
         trackWidthLabel.setVisible(true)
         trackWidthSlider.setVisible(true)
@@ -88,6 +115,16 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
         trackWidthLabel.setVisible(false)
         trackWidthSlider.setVisible(false)
       }
+
+      if(trackTool.mode == TrackTool.PlaceObjects) {
+        mapObjectName.setVisible(true)
+        mapObjectList.setVisible(true)
+      }
+      else {
+        mapObjectName.setVisible(false)
+        mapObjectList.setVisible(false)
+      }
+
     }
 
     val toggleButtons = Array.ofDim[ToggleButton](3)
@@ -173,6 +210,21 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
       val trackCreator = creatorInput.getText.filterNot(_ == FormulaIO.STRING_SEP_CHAR).trim.take(Track.CREATOR_MAX_LENGTH)
       val trackDescription = descriptionInput.getText.filterNot(_ == FormulaIO.STRING_SEP_CHAR).trim
 
+      def saveTrack() = {
+        val newTrack = new Track(trackName, trackDescription, if(trackCreator.isEmpty) "Unknown" else trackCreator,
+          trackTool.roadWidth, trackTool.mapObjects.toVector)
+        newTrack.rewriteRoad(trackTool.trackImage, new ClosedLoop(trackTool.pathPositions))
+        val success = FormulaIO.saveTrack(newTrack)
+
+        if(success) {
+          MainApplication.transition(new TrackSelectScreen(TrackSelectScreen.TrackTool))
+        }
+
+        else {
+          MainApplication.messageBox("Failed to save track")
+        }
+      }
+
       if(!trackTool.roadCompleted) {
         MainApplication.messageBox("This track needs a road")
       }
@@ -181,20 +233,14 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
         MainApplication.messageBox("This track needs a name")
       }
 
+      else if(FormulaIO.listTrackFiles.contains(trackName+".trck")) {
+        if(MainApplication.confirmBox("Track with this name already exists. Overwrite it?")) {
+          saveTrack()
+        }
+      }
+
       else if(MainApplication.confirmBox(s"Save track named: $trackName?")) {
-
-        val newTrack = new Track(trackName, trackDescription, if(trackCreator.isEmpty) "Unknown" else trackCreator, trackTool.roadWidth)
-        newTrack.rewriteRoad(trackTool.trackImage, new ClosedLoop(trackTool.pathPositions))
-        val success = FormulaIO.saveTrack(newTrack)
-
-        if(success) {
-          MainApplication.messageBox("Track saved succesfully")
-          MainApplication.transition(new TrackSelectScreen(TrackSelectScreen.TrackTool))
-        }
-
-        else {
-          MainApplication.messageBox("Failed to save track")
-        }
+        saveTrack()
       }
     })
     saveButton.percentPosition = (0.5, 0.85)

@@ -10,7 +10,8 @@ class ComputerPlayer
   protected val AI_TURN_BONUS = 10D
   protected val CENTRE_CUTOFF = 0D
   protected val TURN_ANIMATION_COOLDOWN = 0.2
-  protected val CURVINESS_FACTOR = 6.1D
+  protected val CURVINESS_FACTOR = 9.8D
+  protected val FUTURE_POINT_COUNT = 5
 
   protected var lastTurnSwitch          = 0L
   protected var turnSwitchFrequency     = 0D
@@ -31,10 +32,10 @@ class ComputerPlayer
 
     //These are experimental values from running the AI on a few tracks
     val mult = CURVINESS_FACTOR / game.track.roadWidth
-    if(mult * curviness > 0.15) 1
-    else if(mult * curviness > 0.014) 2
-    else if(mult * curviness > 0.013) 3
-    else if(mult * curviness > 0.0085) 4
+    if(mult * curviness > 0.40) 1
+    else if(mult * curviness > 0.13) 2
+    else if(mult * curviness > 0.05) 3
+    else if(mult * curviness > 0.003) 4
     else 5
 
   }
@@ -51,8 +52,10 @@ class ComputerPlayer
     val trackDir = game.track.primaryPath.directionNormalized(trackIndex)
     val trackPerp = game.track.primaryPath.perpendicular(trackIndex)
 
-    val roadDirs = Vector.tabulate(4)(i => game.track.primaryPath.directionNormalized(i + trackIndex))
-    val roadCurviness = roadDirs.sliding(2).foldLeft[Double](0D)((a, b) => a + (b(0) ang b(1))) / roadDirs.length
+    //Approximate how curvy the road is
+    val roadDirs = Vector.tabulate(FUTURE_POINT_COUNT)(i => game.track.primaryPath.directionNormalized(i + trackIndex))
+    val angs = roadDirs.map(_ ang _direction).filterNot(_.isNaN) //For some reason there's NaNs, quick fix is to filter
+    val roadCurviness = angs.map(d => d * d).sum / roadDirs.length
 
     val desiredGear = decideGear(roadCurviness)
 

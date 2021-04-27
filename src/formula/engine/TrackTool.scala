@@ -15,6 +15,7 @@ object TrackTool {
 
   val PATH_POSITION_DIST = 10
   val PATH_POSITION_DIST_SQR = PATH_POSITION_DIST * PATH_POSITION_DIST
+  val MAP_OBJECT_SELECTION_RADIUS = 5D
 
 }
 
@@ -24,10 +25,8 @@ class TrackTool {
   protected val trackGraphics = trackImage.createGraphics()
 
 
-  def exit() = {
-    //Release resources
-    trackGraphics.dispose()
-  }
+  var selectedMapObject = -1
+
 
 
   protected var _mousePosition = V2D(-1, -1)
@@ -61,23 +60,51 @@ class TrackTool {
   def drawingTrack = _drawingTrack
 
 
+  protected val _mapObjects = ArrayBuffer[MapObject]()
+  def mapObjects = _mapObjects
+
   def goalPosition = if(pathPositions.isEmpty) None else Some(pathPositions(0))
 
-  protected val primaryPathPositions = ArrayBuffer[V2D]()
-  def pathPositions = primaryPathPositions.toVector
+  protected val _primaryPathPositions = ArrayBuffer[V2D]()
+  def pathPositions = _primaryPathPositions.toVector
   protected var _roadCompleted = false
   def roadCompleted = _roadCompleted
 
   var onTrackCompleted: () => Unit = () => {}
 
 
+
+  def placeObject() = {
+    if(selectedMapObject != -1) {
+      if(mousePosition.higherThan(V2D(0, 0)) && mousePosition.lowerThan(V2D(1, 1))) {
+
+        val pos = V2D(mousePosition.x * Track.TRACK_WIDTH, mousePosition.y * Track.TRACK_HEIGHT)
+        mapObjects += MapObjects.createMapObject(selectedMapObject, pos)
+
+      }
+    }
+  }
+
+  def removeObject() = {
+    if(mapObjects.nonEmpty) {
+
+      val pos = V2D(mousePosition.x * Track.TRACK_WIDTH, mousePosition.y * Track.TRACK_HEIGHT)
+      val i = V2D.locateIndex(pos, mapObjects.map(_.position).toVector)
+
+      if((pos dist mapObjects(i).position) <= TrackTool.MAP_OBJECT_SELECTION_RADIUS) {
+        mapObjects.remove(i)
+      }
+
+    }
+  }
+
   def placeGoal() = {
     if(pathPositions.nonEmpty) {
 
       val i = V2D.locateIndex(V2D(mousePosition.x * Track.TRACK_WIDTH, mousePosition.y * Track.TRACK_HEIGHT), pathPositions)
       val positions = pathPositions.takeRight(pathPositions.length - i) ++ pathPositions.take(i)
-      primaryPathPositions.clear()
-      primaryPathPositions.appendAll(positions)
+      _primaryPathPositions.clear()
+      _primaryPathPositions.appendAll(positions)
 
     }
   }
@@ -85,11 +112,11 @@ class TrackTool {
   def reverseTrack() = {
 
     if(pathPositions.nonEmpty) {
-      val goal = primaryPathPositions.head
-      val rev = primaryPathPositions.tail.reverse
-      primaryPathPositions.clear()
-      primaryPathPositions.append(goal)
-      primaryPathPositions.appendAll(rev)
+      val goal = _primaryPathPositions.head
+      val rev = _primaryPathPositions.tail.reverse
+      _primaryPathPositions.clear()
+      _primaryPathPositions.append(goal)
+      _primaryPathPositions.appendAll(rev)
     }
   }
 
@@ -99,35 +126,35 @@ class TrackTool {
       if(roadCompleted) {
         if(MainApplication.confirmBox("This will clear the previous track and all map objects. Continue?")) {
           _roadCompleted = false
-          primaryPathPositions.clear()
+          _primaryPathPositions.clear()
           clearArea()
         }
       }
 
       else {
         _roadCompleted = false
-        primaryPathPositions.clear()
+        _primaryPathPositions.clear()
         clearArea()
         trackGraphics.setColor(Color.BLACK)
         trackGraphics.setStroke(new BasicStroke(roadWidth.toFloat, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND))
         _drawingTrack = true
         val gX = math.round(mousePosition.x * Track.TRACK_WIDTH).toInt
         val gY = math.round(mousePosition.y * Track.TRACK_HEIGHT).toInt
-        primaryPathPositions += V2D(gX, gY)
+        _primaryPathPositions += V2D(gX, gY)
       }
     }
   }
 
   protected def placePathPoints(pos: V2D) = {
 
-    val p1 = primaryPathPositions.last
+    val p1 = _primaryPathPositions.last
     val p2 = V2D(pos.x * Track.TRACK_WIDTH, pos.y * Track.TRACK_HEIGHT)
 
     val n = (p2.distSqr(p1) / TrackTool.PATH_POSITION_DIST_SQR).toInt
     val dir = (p2 - p1).normalized
     for(i <- 1 to n) {
       val p = p1 + (dir * i * TrackTool.PATH_POSITION_DIST)
-      primaryPathPositions += p
+      _primaryPathPositions += p
     }
   }
 
@@ -138,7 +165,7 @@ class TrackTool {
     val y2 = math.round(pos2.y * Track.TRACK_HEIGHT).toInt
     if(mousePositionValid && !checkProximity) {
 
-      if(primaryPathPositions.last.distSqr(V2D(x2, y2)) >= TrackTool.PATH_POSITION_DIST_SQR) {
+      if(_primaryPathPositions.last.distSqr(V2D(x2, y2)) >= TrackTool.PATH_POSITION_DIST_SQR) {
         placePathPoints(pos2)
       }
 
@@ -157,7 +184,7 @@ class TrackTool {
 
   def stopTrackDraw() = {
     _drawingTrack = false
-    primaryPathPositions.clear()
+    _primaryPathPositions.clear()
     clearArea()
   }
 
@@ -188,11 +215,11 @@ class TrackTool {
     val d = roadWidth * roadWidth + 2
     var i = 2
     var tooClose = false
-    while(i < primaryPathPositions.length - 4) {
+    while(i < _primaryPathPositions.length - 4) {
 
-      if(primaryPathPositions(i).distSqr(pos) <= d) {
+      if(_primaryPathPositions(i).distSqr(pos) <= d) {
         tooClose = true
-        i = primaryPathPositions.length
+        i = _primaryPathPositions.length
       }
 
       i += 1
@@ -201,20 +228,26 @@ class TrackTool {
   }
 
   protected def attemptLoopComplete() = {
-    if(primaryPathPositions.length > 6) {
+    if(_primaryPathPositions.length > 6) {
       val d = roadWidth * roadWidth + 30
-      val p1 = primaryPathPositions.last
-      val p2 = primaryPathPositions(0)
+      val p1 = _primaryPathPositions.last
+      val p2 = _primaryPathPositions(0)
       if(p1.distSqr(p2) <= d) {
         val x1 = math.round(p1.x).toInt
         val y1 = math.round(p1.y).toInt
         val x2 = math.round(p2.x).toInt
         val y2 = math.round(p2.y).toInt
         trackGraphics.drawLine(x1, y1, x2, y2)
-        primaryPathPositions += p1 + ((p2 - p1) * 0.5)
+        _primaryPathPositions += p1 + ((p2 - p1) * 0.5)
         completeTrackDraw()
       }
     }
+  }
+
+
+  def exit() = {
+    //Release resources
+    trackGraphics.dispose()
   }
 
 }

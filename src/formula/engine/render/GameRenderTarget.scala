@@ -27,13 +27,18 @@ class GameRenderTarget(val game: Game, val playerNumber: Int) extends RenderTarg
   sky.percentSize = (1, 0.33)
   subTargets += sky
 
-  protected val playerRenderTarget = new PlayerRenderTarget(game.players, playerCamera)
-  playerRenderTarget.percentBounds = (0, 0, 1, 1)
-  subTargets += playerRenderTarget
+  protected val mapObjects = new MapObjectRenderTarget(game, playerCamera)
+  mapObjects.percentBounds = (0, 0, 1, 1)
+  subTargets += mapObjects
 
-  protected val animationRenderTarget = new AnimatedSpriteRenderTarget(game, playerCamera)
-  animationRenderTarget.percentBounds = (0, 0, 1, 1)
-  subTargets += animationRenderTarget
+  protected val players = new PlayerRenderTarget(game.players, playerCamera)
+  players.percentBounds = (0, 0, 1, 1)
+  subTargets += players
+
+  protected val animations = new AnimatedSpriteRenderTarget(game, playerCamera)
+  animations.percentBounds = (0, 0, 1, 1)
+  subTargets += animations
+
 
 
   //Hud elements will have their positions set with more specific rules
@@ -57,6 +62,7 @@ class GameRenderTarget(val game: Game, val playerNumber: Int) extends RenderTarg
   subTargets += mainText
 
 
+
   protected val timeText = new InfoRenderTarget(textfont = Fonts.TimesNewRoman,
     fontsize = 10, infoFunction = () => game.clockTime)
 
@@ -69,6 +75,10 @@ class GameRenderTarget(val game: Game, val playerNumber: Int) extends RenderTarg
 
   lapText.percentBounds = (0.3, 0.1, 0.4, 0.1)
   subTargets += lapText
+
+  protected val playerNameText = new TextRenderTarget(game.playerNames(playerNumber), fontSize = 8)
+  playerNameText.percentBounds = (0.75, 0.025, 0.2, 0.1)
+  subTargets += playerNameText
 
 
 

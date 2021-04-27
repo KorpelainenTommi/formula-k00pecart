@@ -7,8 +7,11 @@ object Player {
   val TURN_RATE  = 50D
   val BASE_SPEED = 15D
 
-  val GEAR_SHIFT_COOLDOWN  = 0.5D //seconds
+  //Cooldowns in seconds
+  val GEAR_SHIFT_COOLDOWN  = 0.5D
   val DESTRUCTION_COOLDOWN = 1.3D
+  val EFFECT_COOLDOWN = 0.1D
+  val OIL_COOLDOWN = 1D
 
   //CAMERA_DISTANCE is the distance at which the camera follows the player
   //PLAYER_SIZE determines the scale of the player for rendering and game logic
@@ -31,13 +34,21 @@ class Player
   _camera.position = initialPosition - initialDirection * Player.CAMERA_DISTANCE
 
 
+  //Also cache all oil spills on the map
+  protected val oilSpills = game.track.mapObjects.filter(_.name == "OilSpill")
+
+
   //Player state for movement and track progress
   protected var _lap = 1
   protected var _gear = 0
   protected var _turnMult = 0D
+
+  //Tracking cooldowns
   protected var _lastGearShift = game.startTime
   protected var _lastDestruction = 0L
   protected var _lastCheckpoint = 0
+  protected var _lastEffect = 0L
+  protected var _lastOil = 0L
 
   protected var _position = initialPosition
   protected var _direction = initialDirection
@@ -46,6 +57,7 @@ class Player
   //Player state indicating visibility, and ability to move
   var destroyed = false
   var active = false
+  var oiled  = false
 
 
 
@@ -146,10 +158,10 @@ class Player
   //endregion
 
 
-
+  def cooldownOff(time: Long, start: Long, duration: Double) = (time - start) / Game.TIME_PRECISION  > duration
 
   //Movement options
-  def shiftOnCooldown(time: Long) = (time - _lastGearShift) / Game.TIME_PRECISION <= Player.GEAR_SHIFT_COOLDOWN
+  def shiftOnCooldown(time: Long) = !cooldownOff(time, _lastGearShift, Player.GEAR_SHIFT_COOLDOWN)
 
   def shiftGearUp(time: Long, deltaT: Double) = {
 
@@ -211,8 +223,8 @@ class Player
     if(gearUp) shiftGearUp(time, deltaT)
     else if(gearDown) shiftGearDown(time, deltaT)
 
-    if(turnLeft) turnCarLeft(time, deltaT)
-    if(turnRight) turnCarRight(time, deltaT)
+    if(turnLeft && !oiled) turnCarLeft(time, deltaT)
+    if(turnRight && !oiled) turnCarRight(time, deltaT)
 
   }
 
@@ -250,8 +262,12 @@ class Player
 
   def update(time: Long, deltaT: Double) = {
 
-    if(destroyed && (time - _lastDestruction) / Game.TIME_PRECISION > Player.DESTRUCTION_COOLDOWN) {
+    if(destroyed && cooldownOff(time, _lastDestruction, Player.DESTRUCTION_COOLDOWN)) {
       respawn()
+    }
+
+    if(oiled && cooldownOff(time, _lastOil, Player.OIL_COOLDOWN)) {
+      oiled = false
     }
 
     if(active) {
@@ -263,11 +279,38 @@ class Player
       val newPosition = position + velocity
       _position = V2D(math.min(math.max(newPosition.x, 0), Track.TRACK_WIDTH), math.min(math.max(newPosition.y, 0), Track.TRACK_HEIGHT))
 
+
+      //Render animated particle effects
+      if(formula.application.MainApplication.settings.effects && cooldownOff(time, _lastEffect, Player.EFFECT_COOLDOWN)) {
+
+        if((turnLeft || turnRight) && math.abs(gear) > 0) {
+          _lastEffect = time
+          val sprite = if(oiled) AnimatedSprites.Oil else AnimatedSprites.Smoke
+          AnimatedSprites.spawnSprite(sprite, _position + _direction.rotDeg(100) * scale * 0.35, 4D, time)
+          AnimatedSprites.spawnSprite(sprite, _position + _direction.rotDeg(-100) * scale * 0.35, 4D, time)
+        }
+
+        else if(gear > 2) {
+          _lastEffect = time
+          AnimatedSprites.spawnSprite(AnimatedSprites.Speed, _position - _direction * scale * 0.1, 4D, time)
+        }
+
+      }
+
     }
 
 
     _camera.position = _position - direction * Player.CAMERA_DISTANCE
     _camera.scanVector = direction
+
+
+    //Test if we hit an oil spill
+    oilSpills.foreach(obj => {
+      if((obj.position distSqr _position) < obj.scale * obj.scale) {
+        _lastOil = time
+        oiled = true
+      }
+    })
 
     //Test if we are offroad
     if(!game.track.road(_position) && !destroyed) {

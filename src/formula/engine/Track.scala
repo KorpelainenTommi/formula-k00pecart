@@ -128,7 +128,7 @@ object Track extends Serializer[Track] {
     idx += descriptionData._2
     val fastestTimesSize = bytes(idx)
     idx += 1
-    val fastestTimes = Array.fill(fastestTimesSize)({
+    val fastestTimes = Vector.fill(fastestTimesSize)({
       val t = FormulaIO.loadInt(bytes, idx)
       idx += 4
       val descData = FormulaIO.loadString(bytes, idx)
@@ -136,7 +136,7 @@ object Track extends Serializer[Track] {
       (t, descData._1)
     })
     val trc = new Track(nameData._1, descriptionData._1, creatorData._1, version = version)
-    trc._fastestTimes = fastestTimes.toVector
+    trc._fastestTimes = fastestTimes
     trc._roadBytes = Some(bytes.slice(idx, idx+Track.TRACK_WIDTH*Track.TRACK_HEIGHT/8))
     idx += Track.TRACK_WIDTH*TRACK_HEIGHT/8
     trc.createPreviewImage()
@@ -156,6 +156,14 @@ object Track extends Serializer[Track] {
     idx += 8
     track._primaryPath = ClosedPath.load(bytes, idx).toClosedLoop
     idx += track.primaryPath.length * 16 + 4
+    val mapObjectCount = FormulaIO.loadInt(bytes, idx)
+    idx += 4
+    val mapObjects = Vector.fill(mapObjectCount)({
+      val obj = MapObjects.load(bytes, idx)
+      idx += 20
+      obj
+    })
+    track._mapObjects = mapObjects
     track
 
   }
@@ -168,7 +176,9 @@ object Track extends Serializer[Track] {
     headerBytes ++
     roadBytes ++
     FormulaIO.saveDouble(saveable.roadWidth) ++
-    ClosedPath.save(saveable.primaryPath)
+    ClosedPath.save(saveable.primaryPath) ++
+    FormulaIO.saveInt(saveable.mapObjects.length) ++
+    saveable.mapObjects.flatMap(MapObjects.save(_))
 
   }
 
@@ -183,6 +193,7 @@ class Track
  description: String = "",
  creator: String = "Unknown",
  protected var _roadWidth: Double = 25D,
+ protected var _mapObjects: Vector[MapObject] = Vector(),
  version: Byte = 0)
  extends TrackPreview(trackName, description, creator, version) {
 
@@ -192,6 +203,7 @@ class Track
 
   def primaryPath = _primaryPath
   def roadWidth = _roadWidth
+  def mapObjects = _mapObjects
 
 
   //Check if a given position is on the road

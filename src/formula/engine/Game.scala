@@ -14,6 +14,7 @@ object Game {
   val TARGET_FRAMETIME = 1D / formula.application.MainApplication.settings.targetFramerate
 
   val GAME_COUNTDOWN = 2.4D
+  val PLAYER_NAME_MAX_LENGTH = 13
 
 }
 
@@ -175,7 +176,7 @@ class Game
   def victory(playerNumber: Int) = {
 
     players.filterNot(_.playerNumber == playerNumber).foreach(_.active = false)
-    MainApplication.transition(new ResultScreen(track, (((time - startTime) / Game.CLOCK_PRECISION).toInt, "")))
+    MainApplication.transition(new ResultScreen(track, ((time - startTime) / Game.CLOCK_PRECISION).toInt, nOfLaps, playerNames.take(nOfPlayers), playerNumber))
 
   }
 }

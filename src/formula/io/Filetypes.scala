@@ -19,8 +19,15 @@ trait Serializer[T] {
  * @param player1Controls Array of virtual keys for player1
  * @param player2Controls Array of virtual keys for player2
  * @param targetFramerate Desired framerate for the game
+ * @param effects Controls whether the game will render animated effects on cars
  */
-case class Settings(resolution: Int, fullScreen: Boolean, player1Controls: Array[Int], player2Controls: Array[Int], targetFramerate: Int) {
+case class Settings
+(resolution: Int,
+ fullScreen: Boolean,
+ player1Controls: Array[Int],
+ player2Controls: Array[Int],
+ targetFramerate: Int,
+ effects: Boolean) {
   def screenSize = Settings.resolutions(if(resolution < 0 || resolution >= Settings.resolutions.length) 0 else resolution)
 }
 
@@ -90,7 +97,7 @@ object Settings extends Serializer[Settings] {
   val defaultPlayer2Controls = Array(KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_UP, KeyEvent.VK_DOWN)
 
 
-  def defaultSettings = Settings(0, false, defaultPlayer1Controls, defaultPlayer2Controls, 150)
+  def defaultSettings = Settings(0, false, defaultPlayer1Controls, defaultPlayer2Controls, 150, true)
 
 
   override def save(saveable: Settings) = {
@@ -98,12 +105,13 @@ object Settings extends Serializer[Settings] {
     FormulaIO.saveInt(saveable.resolution) ++
     saveable.player1Controls.flatMap(FormulaIO.saveInt(_)) ++
     saveable.player2Controls.flatMap(FormulaIO.saveInt(_)) ++
-    FormulaIO.saveInt(saveable.targetFramerate)
+    FormulaIO.saveInt(saveable.targetFramerate) ++
+    Array[Byte](if(saveable.effects) 1 else 0)
   }
 
   override def load(bytes: Array[Byte], start: Int) = {
 
-    if(bytes.length < start + 9 + defaultPlayer1Controls.length*4 + defaultPlayer2Controls.length*4) {
+    if(bytes.length < start + 10 + defaultPlayer1Controls.length*4 + defaultPlayer2Controls.length*4) {
       defaultSettings
     }
 
@@ -127,9 +135,10 @@ object Settings extends Serializer[Settings] {
       var targetFramerate = FormulaIO.loadInt(bytes, idx)
       idx += 4
       if(targetFramerate <= 0) targetFramerate = defaultSettings.targetFramerate
+      val effects = bytes(start + idx) != 0
 
       Settings(if(resolution<0 || resolution>resolutions.length-1) 0 else resolution,
-        fullScreen, player1Controls, player2Controls, targetFramerate)
+        fullScreen, player1Controls, player2Controls, targetFramerate, effects)
     }
 
   }

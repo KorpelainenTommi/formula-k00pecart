@@ -113,7 +113,7 @@ object V2D extends Serializer[V2D] {
   }
 
 
-  override def save(saveable: V2D): Array[Byte] = FormulaIO.saveDouble(saveable.x) ++ FormulaIO.saveDouble(saveable.y)
-  override def load(bytes: Array[Byte], start: Int): V2D = V2D(FormulaIO.loadDouble(bytes, start), FormulaIO.loadDouble(bytes, start+8))
+  override def save(saveable: V2D) = FormulaIO.saveDouble(saveable.x) ++ FormulaIO.saveDouble(saveable.y)
+  override def load(bytes: Array[Byte], start: Int) = V2D(FormulaIO.loadDouble(bytes, start), FormulaIO.loadDouble(bytes, start+8))
 
 }

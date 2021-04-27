@@ -92,8 +92,8 @@ class PlayerNamingScreen(track: Track) extends StaticScreen(Textures.Background_
 
       val laps = math.max(lapsInput.getText.toIntOption.getOrElse(3), 1)
       val playerCount = playersDropdown.getSelectedIndex + 1
-      val player1Name = player1NameInput.getText.filterNot(_ == FormulaIO.STRING_SEP_CHAR).trim
-      val player2Name = player2NameInput.getText.filterNot(_ == FormulaIO.STRING_SEP_CHAR).trim
+      val player1Name = player1NameInput.getText.filterNot(_ == FormulaIO.STRING_SEP_CHAR).trim.take(Game.PLAYER_NAME_MAX_LENGTH)
+      val player2Name = player2NameInput.getText.filterNot(_ == FormulaIO.STRING_SEP_CHAR).trim.take(Game.PLAYER_NAME_MAX_LENGTH)
       val player1AI = player1AIDropdown.getSelectedIndex == 1
       val player2AI = player2AIDropdown.getSelectedIndex == 1
 

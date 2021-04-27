@@ -62,6 +62,17 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
     fpsValue.percentPosition = (0.05, 0.5)
     subPanel.addComponent(fpsValue)
 
+    val effectsLabel = new FontLabel("Particle effects", fontSize = 1.8F)
+    effectsLabel.percentSize = (2*GUIConstants.TEXTFIELD_WIDTH/subW, GUIConstants.TEXTFIELD_HEIGHT/subH)
+    effectsLabel.percentPosition = (0.6, 0.4)
+    subPanel.addComponent(effectsLabel)
+
+    val effectsDropdown = new DropDown(Vector("On", "Off"))
+    effectsDropdown.percentSize = (GUIConstants.TEXTFIELD_WIDTH / subW / 3, GUIConstants.TEXTFIELD_HEIGHT/subH)
+    effectsDropdown.percentPosition = (0.6, 0.5)
+    effectsDropdown.setSelectedIndex(if(MainApplication.settings.effects) 0 else 1)
+    subPanel.addComponent(effectsDropdown)
+
 
     val controlsLabel = new FontLabel("C O N T R O L S", fontSize = 2.3F, fontColor = GUIConstants.COLOR_HEADER)
     controlsLabel.percentSize = (2*GUIConstants.TEXTFIELD_WIDTH/subW, GUIConstants.TEXTFIELD_HEIGHT/subH)
@@ -163,7 +174,8 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
       var targetFramerate = math.abs(fpsValue.getText.toIntOption.getOrElse(MainApplication.settings.targetFramerate))
       if(targetFramerate == 0) targetFramerate = MainApplication.settings.targetFramerate
       fpsValue.setText(targetFramerate.toString)
-      val newSettings = Settings(resolutionDropdown.getSelectedIndex, screenDropdown.getSelectedIndex == 1, keyCodes1, keyCodes2, targetFramerate)
+      val newSettings = Settings(resolutionDropdown.getSelectedIndex,
+        screenDropdown.getSelectedIndex == 1, keyCodes1, keyCodes2, targetFramerate, effectsDropdown.getSelectedIndex == 0)
       val success = FormulaIO.saveSettings(newSettings)
       if(success) {
         MainApplication.updateSettings(newSettings)
@@ -181,12 +193,14 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
       var targetFramerate = math.abs(fpsValue.getText.toIntOption.getOrElse(MainApplication.settings.targetFramerate))
       if(targetFramerate == 0) targetFramerate = MainApplication.settings.targetFramerate
       fpsValue.setText(targetFramerate.toString)
-      val newSettings = Settings(resolutionDropdown.getSelectedIndex, screenDropdown.getSelectedIndex == 1, keyCodes1, keyCodes2, targetFramerate)
+      val newSettings = Settings(resolutionDropdown.getSelectedIndex,
+        screenDropdown.getSelectedIndex == 1, keyCodes1, keyCodes2, targetFramerate, effectsDropdown.getSelectedIndex == 0)
       val controlsChanged = !keyCodes1.sameElements(MainApplication.settings.player1Controls) || !keyCodes2.sameElements(MainApplication.settings.player2Controls)
 
       if(controlsChanged ||
         newSettings.resolution != MainApplication.settings.resolution ||
         newSettings.fullScreen != MainApplication.settings.fullScreen ||
+        newSettings.effects    != MainApplication.settings.effects    ||
         newSettings.targetFramerate != MainApplication.settings.targetFramerate) {
         if(MainApplication.confirmBox("You have unsaved settings that will be discarded. Exit anyway?")) MainApplication.transition(new MainMenuScreen)
       }

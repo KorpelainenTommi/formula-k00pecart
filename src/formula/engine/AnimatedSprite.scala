@@ -8,12 +8,18 @@ import scala.collection.mutable.PriorityQueue
 object AnimatedSprites {
 
   val animating = PriorityQueue[AnimatedSprite]()(Ordering.by(_.endTime))
-  val Explosion = Textures.Explosion
+  val Explosion = Textures.ANIM_Explosion
+  val Smoke = Textures.ANIM_Smoke
+  val Speed = Textures.ANIM_Speed
+  val Oil   = Textures.ANIM_Oil
 
   def spawnSprite(texture: Texture, pos: V2D, scale: Double, time: Long) = {
 
     val animation = texture match {
       case Explosion => new AnimatedSprite(7, 4, 88, 88, 60, Explosion, pos, scale, time)
+      case Smoke => new AnimatedSprite(3, 1, 100, 100, 30, Smoke, pos, scale, time)
+      case Speed => new AnimatedSprite(3, 1, 100, 100, 60, Speed, pos, scale, time)
+      case Oil   => new AnimatedSprite(3, 1, 100, 100, 30, Oil, pos, scale, time)
     }
 
     animating.enqueue(animation)

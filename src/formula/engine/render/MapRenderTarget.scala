@@ -45,6 +45,29 @@ class MapRenderTarget(val game: Game) extends RenderTarget {
     g.drawRect(absoluteBounds.x, absoluteBounds.y, absoluteBounds.width, absoluteBounds.height)
     g.drawImage(game.track.previewImage, absoluteBounds.x+1, absoluteBounds.y+1, absoluteBounds.width-2, absoluteBounds.height-2, null)
 
+    //Draw map objects
+
+    game.track.mapObjects.foreach(obj => {
+
+      val scale = 20
+      val scaleH = scale * obj.spriteRatio
+
+      val x1 = (obj.position.x - 0.5 * scale) / Track.TRACK_WIDTH
+      val x2 = (obj.position.x + 0.5 * scale) / Track.TRACK_WIDTH
+      val y1 = (obj.position.y - 0.5 * scaleH) / Track.TRACK_HEIGHT
+      val y2 = (obj.position.y + 0.5 * scaleH) / Track.TRACK_HEIGHT
+      val w = x2 - x1
+      val h = y2 - y1
+
+      g.drawImage(FormulaIO.getTexture(obj.texture),
+          math.round(absoluteBounds.x + absoluteBounds.width * x1).toInt,
+          math.round(absoluteBounds.y + absoluteBounds.height * y1).toInt,
+          math.round(absoluteBounds.width * w).toInt,
+          math.round(absoluteBounds.height * h).toInt, null)
+
+    })
+
+
     //Draw the green goal line
     g.setColor(Color.GREEN)
     g.setStroke(new BasicStroke(2))

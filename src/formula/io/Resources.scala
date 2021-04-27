@@ -16,6 +16,7 @@ trait Resource extends Enumeration {
 object Textures extends Resource {
   type Texture = Value
 
+
   val Sky    = Value
   val Goal   = Value
   val Road   = Value
@@ -55,12 +56,25 @@ object Textures extends Resource {
   val Gear4 = Value
   val Gear5 = Value
 
-  val Explosion = Value
+  //Animated
+  val ANIM_Oil   = Value
+  val ANIM_Smoke = Value
+  val ANIM_Speed = Value
+  val ANIM_Explosion = Value
 
+
+  val OBJ_Oil   = Value
+  val OBJ_Tree  = Value
+  val OBJ_Rock  = Value
+  val OBJ_Tuft0 = Value
+  val OBJ_Tuft1 = Value
+  val OBJ_Tuft2 = Value
 
   //Texture lists for convinience
 
+  val OBJ_TEXTURES   = Vector(OBJ_Oil, OBJ_Tree, OBJ_Rock, OBJ_Tuft0, OBJ_Tuft1, OBJ_Tuft2)
   val HUD_TEXTURES   = Vector(GearR, Gear0, Gear1, Gear2, Gear3, Gear4, Gear5)
+  val ANIM_TEXTURES  = Vector(ANIM_Explosion, ANIM_Smoke, ANIM_Speed, ANIM_Oil)
   val TRACK_TEXTURES = Vector(Goal, Road, Grass, Sky)
 
   val CAR_RED_TEXTURES = Vector(
@@ -72,7 +86,7 @@ object Textures extends Resource {
     CarOrangeLeft, CarOrangeRight, CarOrangeLeftFront, CarOrangeRightFront, CarOrangeFront)
 
 
-  val GAME_TEXTURES = TRACK_TEXTURES ++ CAR_RED_TEXTURES ++ CAR_ORANGE_TEXTURES ++ HUD_TEXTURES :+ Explosion
+  val GAME_TEXTURES = TRACK_TEXTURES ++ CAR_RED_TEXTURES ++ CAR_ORANGE_TEXTURES ++ HUD_TEXTURES ++ OBJ_TEXTURES ++ ANIM_TEXTURES
 
 
   private def fold(parts: String*) = FormulaIO.resolveNameS(parts)
@@ -80,7 +94,6 @@ object Textures extends Resource {
   def path(t: Texture) = {
 
     t match {
-
       case Sky    => fold("tracks", "sky0.png")
       case Goal   => fold("tracks", "goal0.png")
       case Road   => fold("tracks", "road0.png")
@@ -118,7 +131,17 @@ object Textures extends Resource {
       case Gear4 => fold("hud", "gear4.png")
       case Gear5 => fold("hud", "gear5.png")
 
-      case Explosion => fold("animated", "explosion0.png")
+      case ANIM_Explosion => fold("animated", "explosion0.png")
+      case ANIM_Smoke => fold("animated", "smoke0.png")
+      case ANIM_Speed => fold("animated", "speed0.png")
+      case ANIM_Oil   => fold("animated", "smoke1.png")
+
+      case OBJ_Oil    => fold("objects", "oil0.png")
+      case OBJ_Tree   => fold("objects", "tree0.png")
+      case OBJ_Rock   => fold("objects", "rock0.png")
+      case OBJ_Tuft0  => fold("objects", "tuft0.png")
+      case OBJ_Tuft1  => fold("objects", "tuft1.png")
+      case OBJ_Tuft2  => fold("objects", "tuft2.png")
     }
 
   }

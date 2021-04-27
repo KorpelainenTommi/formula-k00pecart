@@ -61,7 +61,6 @@ class TrackSelectScreen(val purpose: TrackSelectScreen.Mode = TrackSelectScreen.
           val filename = trackfileNames(trackImages.selectedIndex)
           if(MainApplication.confirmBox("This will delete the track. Are you sure?")) {
             if(FormulaIO.deleteTrack(filename)) {
-              MainApplication.messageBox("Track deleted successfully")
               MainApplication.transition(new TrackSelectScreen(TrackSelectScreen.TrackTool))
             }
             else {

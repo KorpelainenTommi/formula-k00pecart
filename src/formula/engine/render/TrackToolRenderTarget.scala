@@ -1,6 +1,8 @@
 package formula.engine.render
 import formula.application.GUIConstants
 import formula.engine._
+import formula.io._
+
 import java.awt._
 
 //RenderTarget responsible for rendering the interactive view of the tracktool
@@ -11,6 +13,7 @@ class TrackToolRenderTarget(val tool: TrackTool) extends RenderTarget {
   private val COLOR_GOAL              = new Color(255, 120,  0 , 255)
   private val COLOR_PATH              = new Color(255, 255,  0 , 100)
   private val COLOR_HIGHLIGHT         = new Color(255, 120,  0 , 120)
+  private val COLOR_PLACEOBJECTS      = new Color( 0,  255, 225, 100)
   private val COLOR_DRAWTRACK_VALID   = new Color( 0 ,  0 , 255, 100)
   private val COLOR_DRAWTRACK_INVALID = new Color(255,  0 ,  0 , 100)
 
@@ -59,10 +62,37 @@ class TrackToolRenderTarget(val tool: TrackTool) extends RenderTarget {
     g.drawImage(tool.trackImage, absoluteBounds.x, absoluteBounds.y, absoluteBounds.width, absoluteBounds.height, null)
 
 
+    //Draw placed mapObjects
+    tool.mapObjects.foreach(obj => {
+
+      val scale = 10
+      val scaleH = scale * obj.spriteRatio
+
+      val x1 = (obj.position.x - 0.5 * scale) / Track.TRACK_WIDTH
+      val x2 = (obj.position.x + 0.5 * scale) / Track.TRACK_WIDTH
+      val y1 = (obj.position.y - 0.5 * scaleH) / Track.TRACK_HEIGHT
+      val y2 = (obj.position.y + 0.5 * scaleH) / Track.TRACK_HEIGHT
+      val w = x2 - x1
+      val h = y2 - y1
+
+      g.drawImage(FormulaIO.getTexture(obj.texture),
+          math.round(absoluteBounds.x + absoluteBounds.width * x1).toInt,
+          math.round(absoluteBounds.y + absoluteBounds.height * y1).toInt,
+          math.round(absoluteBounds.width * w).toInt,
+          math.round(absoluteBounds.height * h).toInt, null)
+
+    })
+
+
     //Highlight the cursor position
     if(tool.mode == TrackTool.DrawRoad) {
       g.setColor(if(tool.mousePositionValid) COLOR_DRAWTRACK_VALID else COLOR_DRAWTRACK_INVALID)
       drawCircle(tool.mousePosition, tool.roadWidth, g)
+    }
+
+    else if(tool.mode == TrackTool.PlaceObjects) {
+      g.setColor(COLOR_PLACEOBJECTS)
+      drawCircle(tool.mousePosition, TrackTool.MAP_OBJECT_SELECTION_RADIUS * 2, g)
     }
 
 

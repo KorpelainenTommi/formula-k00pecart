@@ -27,6 +27,7 @@ object FormulaIO {
   //Explicitly use little endian for cross platform compatibility of files
   private val ENDIAN   = ByteOrder.LITTLE_ENDIAN
   private val ENCODING = java.nio.charset.StandardCharsets.UTF_16LE
+  private val BUFFER_SIZE = 1024
 
 
   //Separate strings with a special unicode character when serializing
@@ -87,14 +88,23 @@ object FormulaIO {
 
   }
 
+  private def readAll(in: FileInputStream) = {
 
+    val data = scala.collection.mutable.ArrayBuffer[Byte]()
+    val buffer = Array.ofDim[Byte](BUFFER_SIZE)
+    var len = 0
+
+    while({len = in.read(buffer); data.appendAll(buffer.take(len)); len != -1}) {}
+    data.toArray
+
+  }
 
 
   private def saveFile(bytes: Array[Byte], fullpath: String) = {
 
     var outStream: Option[FileOutputStream] = None
     try {
-      outStream = Some(new FileOutputStream(new File(fullpath)))
+      outStream = Some(new FileOutputStream(new File(fullpath), false)) //append = false
       outStream.get.write(bytes)
       true
     }
@@ -112,7 +122,7 @@ object FormulaIO {
     var inStream: Option[FileInputStream] = None
     try {
       inStream = Some(new FileInputStream(new File(fullpath)))
-      Some(inStream.get.readAllBytes())
+      Some(readAll(inStream.get))
     }
     catch {
       case _: FileNotFoundException | _: IOException => None

@@ -48,7 +48,7 @@ class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
 
   private val leaderBoards = Array.tabulate[FontLabel](formula.engine.Track.MAX_LEADERBOARD)(i => {
     val l = new FontLabel("", formula.io.Fonts.TimesNewRoman, fontSize = 3F, java.awt.Color.YELLOW)
-    l.percentBounds = (0.05, 0.42+i*0.09, 0.9, 0.1)
+    l.percentBounds = (0.2, 0.42+i*0.09, 0.9, 0.1)
     l
   })
   leaderBoards.foreach(this.add)
