@@ -193,7 +193,7 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
 
     val saveButton = new GrayButton("Save changes", () => {
 
-      var targetFramerate = math.abs(fpsValue.getText.toIntOption.getOrElse(MainApplication.settings.targetFramerate))
+      var targetFramerate = math.abs(fpsValue.getText.trim.toIntOption.getOrElse(MainApplication.settings.targetFramerate))
       if(targetFramerate == 0) targetFramerate = MainApplication.settings.targetFramerate
       fpsValue.setText(targetFramerate.toString)
 
@@ -218,7 +218,7 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
 
     val backButton = new GrayButton("Back", () => {
 
-      var targetFramerate = math.abs(fpsValue.getText.toIntOption.getOrElse(MainApplication.settings.targetFramerate))
+      var targetFramerate = math.abs(fpsValue.getText.trim.toIntOption.getOrElse(MainApplication.settings.targetFramerate))
       if(targetFramerate == 0) targetFramerate = MainApplication.settings.targetFramerate
       fpsValue.setText(targetFramerate.toString)
 

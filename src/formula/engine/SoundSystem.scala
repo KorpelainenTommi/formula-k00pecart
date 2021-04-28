@@ -14,7 +14,7 @@ object SoundSystem {
   def playMusic(filename: String) = {
 
     val vol = MainApplication.settings.volume / 100D
-    val db = if(vol <= 0.01) Float.NegativeInfinity else (math.log10(vol) * 10).toFloat
+    val db = if(vol <= 0D) Float.NegativeInfinity else (math.log10(vol) * 10).toFloat
     val file = FormulaIO.getMusic(filename)
 
     file.foreach(f => {
@@ -44,7 +44,7 @@ object SoundSystem {
     }
 
     val vol = absoluteVolume / 100D
-    val db = if(vol <= 0.01) Float.NegativeInfinity else (math.log10(vol) * 10).toFloat
+    val db = if(vol <= 0D) Float.NegativeInfinity else (math.log10(vol) * 10).toFloat
     val file = FormulaIO.getSound(s)
 
     file.foreach(f => {
@@ -105,7 +105,7 @@ class SoundSource(sounds: Vector[Sound]) {
 
   protected def setVolume(sound: Sound, volume: Double) = {
     val vol = volume * MainApplication.settings.volume / 100D
-    val db = if(vol <= 0.01) Float.NegativeInfinity else (math.log10(vol) * 10).toFloat
+    val db = if(vol <= 0D) Float.NegativeInfinity else (math.log10(vol) * 10).toFloat
     clips.get(sound).foreach(c => {
       c.getControl(FloatControl.Type.MASTER_GAIN).asInstanceOf[FloatControl].setValue(db)
     })

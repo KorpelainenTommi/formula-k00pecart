@@ -11,7 +11,7 @@ object Game {
 
   val TIME_PRECISION = 1000000000D
   val CLOCK_PRECISION = 1000000D
-  val TARGET_FRAMETIME = 1D / formula.application.MainApplication.settings.targetFramerate
+  def TARGET_FRAMETIME = 1D / formula.application.MainApplication.settings.targetFramerate
 
   val GAME_COUNTDOWN = 2.4D
   val PLAYER_NAME_MAX_LENGTH = 13
