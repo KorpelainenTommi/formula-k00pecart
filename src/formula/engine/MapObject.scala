@@ -1,8 +1,8 @@
 package formula.engine
-
 import formula.io._
 import formula.io.Textures.Texture
 
+//Allows the creation of mapobjects based on ID
 object MapObjects extends Serializer[MapObject] {
 
   val objectIDList = (0 to 5).toVector

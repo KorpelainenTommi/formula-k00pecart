@@ -14,27 +14,33 @@ class GameRenderTarget(val game: Game, val playerNumber: Int) extends RenderTarg
 
   protected val playerCamera = game.players(playerNumber).camera
 
+  //Ground
   protected val grass = new GrassRenderTarget
   grass.percentPosition = (0, 0.32)
   grass.percentSize = (1, 0.68)
   subTargets += grass
 
+  //Road
   protected val road = new RoadRenderTarget(playerCamera, game.track)
   road.percentBounds = (0, 0, 1, 1)
   subTargets += road
 
+  //Sky
   protected val sky = new SkyRenderTarget
   sky.percentSize = (1, 0.33)
   subTargets += sky
 
+  //Objects
   protected val mapObjects = new MapObjectRenderTarget(game, playerCamera)
   mapObjects.percentBounds = (0, 0, 1, 1)
   subTargets += mapObjects
 
+  //Cars
   protected val players = new PlayerRenderTarget(game.players, playerCamera)
   players.percentBounds = (0, 0, 1, 1)
   subTargets += players
 
+  //Effects
   protected val animations = new AnimatedSpriteRenderTarget(game, playerCamera)
   animations.percentBounds = (0, 0, 1, 1)
   subTargets += animations
@@ -82,7 +88,7 @@ class GameRenderTarget(val game: Game, val playerNumber: Int) extends RenderTarg
 
 
 
-
+  //GameRenderTarget isn't abstract, so it needs to implement this
   override protected def personalRender(g: Graphics2D): Unit = {}
 
 

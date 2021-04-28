@@ -1,7 +1,7 @@
 package formula.engine.render
 import formula.engine._
-
 import java.awt._
+
 class AnimatedSpriteRenderTarget(val game: Game, val camera: Camera) extends RenderTarget {
 
 

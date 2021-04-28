@@ -5,12 +5,13 @@ import formula.io.Sounds.Sound
 import scala.collection.mutable.ArrayBuffer
 import formula.application.MainApplication
 
-
+//A simple system for playing sounds and managing sound clip lifetime
 object SoundSystem {
 
   protected var openClips = ArrayBuffer[Clip]()
   protected val soundSources = ArrayBuffer[SoundSource]()
 
+  //Play a sound file based on filename
   def playMusic(filename: String) = {
 
     val vol = MainApplication.settings.volume / 100D
@@ -36,9 +37,10 @@ object SoundSystem {
 
   }
 
+  //Play a sound
   def playSound(s: Sound, absoluteVolume: Int = MainApplication.settings.volume) = {
 
-    //Closing clips causes delay, so perform cleanup in larger batches
+    //Repeatedly closing expired clips causes delay, so perform cleanup in larger batches
     if(openClips.length > 12) {
       cleanUp()
     }
@@ -66,9 +68,11 @@ object SoundSystem {
 
   }
 
+  //Register a sound source so it can be properly cleaned up
   def registerSoundSource(ss: SoundSource) = {
     soundSources += ss
   }
+
 
   def cleanUp() = {
     openClips.filterNot(_.isRunning).foreach(_.close())
@@ -84,9 +88,15 @@ object SoundSystem {
 
 }
 
+
+
+
+//A SoundSource can manage and play a selection of clips simultaneously, possibly looping them
 class SoundSource(sounds: Vector[Sound]) {
 
   SoundSystem.registerSoundSource(this)
+
+  //Preload clips
   protected val clips = sounds.flatMap(s => {
     val file = FormulaIO.getSound(s)
     file.flatMap(f => {
@@ -103,6 +113,7 @@ class SoundSource(sounds: Vector[Sound]) {
     })
   }).toMap
 
+
   protected def setVolume(sound: Sound, volume: Double) = {
     val vol = volume * MainApplication.settings.volume / 100D
     val db = if(vol <= 0D) Float.NegativeInfinity else (math.log10(vol) * 10).toFloat
@@ -110,6 +121,7 @@ class SoundSource(sounds: Vector[Sound]) {
       c.getControl(FloatControl.Type.MASTER_GAIN).asInstanceOf[FloatControl].setValue(db)
     })
   }
+
 
   def playOnce(sound: Sound, volume: Double) = {
     turnOff(sound)

@@ -7,6 +7,8 @@ import java.awt.image.BufferedImage
 package formula.application {
 
 
+
+  //Traits defining that a component needs to load these resources
   trait TextureLoader {
     protected def textures: Seq[Textures.Texture]
     protected def loadTextures() = {
@@ -21,6 +23,9 @@ package formula.application {
     }
   }
 
+
+
+  //A generic panel with a background
   trait BackgroundPanel {
     protected def background: formula.io.Textures.Texture
     protected def additionalPaint(g: Graphics) = {}
@@ -43,6 +48,9 @@ package formula.application {
     }
   }
 
+
+
+  //A trait describing how sizes and positions are calculated in relative coordinates
   trait PercentBounds {
     protected var pX: Double = 0
     protected var pY: Double = 0
@@ -72,6 +80,8 @@ package formula.application {
     def updateBounds(width: Double, height: Double)
   }
 
+
+  //A generic trait telling that a component uses relative coordinates
   trait ComponentPercentBounds extends PercentBounds {
     def component: JComponent
     override def updateBounds(width: Double, height: Double) = {
@@ -79,6 +89,8 @@ package formula.application {
     }
   }
 
+
+  //A generic trait telling a component uses relative size text and coordinates
   trait TextPercentBounds extends ComponentPercentBounds {
     protected def textFont: Fonts.Font
     protected def fontSize: Float
@@ -88,6 +100,11 @@ package formula.application {
     }
   }
 
+
+
+
+
+  //Simple text component
   class FontLabel
   (txt: String,
   val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT,
@@ -103,11 +120,19 @@ package formula.application {
     this.percentSize = (GUIConstants.TEXTFIELD_WIDTH, GUIConstants.TEXTFIELD_HEIGHT)
   }
 
+
+
+
+  //Checkbox component
   class CheckBox extends JCheckBox with ComponentPercentBounds {
     override def component = this
     this.setOpaque(false)
   }
 
+
+
+
+  //Slider component
   class Slider
   (initialValue: Int,
    val isVertical: Boolean = false,
@@ -131,6 +156,10 @@ package formula.application {
     })
   }
 
+
+
+
+  //A generic button
   class GrayButton
   (val title: String,
    protected var onclick: () => Unit = () => ())
@@ -185,6 +214,10 @@ package formula.application {
     this.percentSize = (GUIConstants.BUTTON_WIDTH, GUIConstants.BUTTON_HEIGHT)
   }
 
+
+
+
+  //A button that can be toggled
   class ToggleButton(title: String, ontoggleclick: Boolean => Unit = _ => ()) extends GrayButton(title) {
 
     protected var _active = false
@@ -202,6 +235,10 @@ package formula.application {
     }
   }
 
+
+
+
+  //A field that accepts user provided text
   class TextInput
   (txt: String = "",
   val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT,
@@ -216,6 +253,10 @@ package formula.application {
     this.percentSize = (GUIConstants.TEXTFIELD_WIDTH, GUIConstants.TEXTFIELD_HEIGHT)
   }
 
+
+
+
+  //A large area for user provided text
   class TextArea
   (txt: String = "",
   val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT,
@@ -246,6 +287,10 @@ package formula.application {
 
   }
 
+
+
+
+  //A dropdown with a list of options
   class DropDown
   (options: Seq[String],
   val textFont: Fonts.Font = GUIConstants.DEFAULT_FONT)
@@ -263,6 +308,10 @@ package formula.application {
 
   }
 
+
+
+
+  //An area providing multiple items to choose from, represented by images
   class ImageDisplayArea
   (entries: Seq[BufferedImage], onSelect: Int => Unit = (_ => {}),
   protected val imageList: JList[ImageIcon] = new JList[ImageIcon]())

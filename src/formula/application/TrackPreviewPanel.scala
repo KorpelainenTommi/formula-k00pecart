@@ -1,8 +1,10 @@
 package formula.application
-import javax.swing._
 import java.awt._
+import javax.swing._
 import formula.engine._
 import java.awt.image.BufferedImage
+
+//A panel that shows a small preview of a selected track
 class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
   this.setLayout(null)
   override def component = this
@@ -11,11 +13,9 @@ class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
     super.paintComponent(g)
 
     if(previewImage.isDefined) {
-      val bounds = g.getClipBounds
-      g.setColor(java.awt.Color.DARK_GRAY)
-      g.fillRect(math.round(bounds.x+0.4*bounds.width).toInt, math.round(bounds.y+0.3*bounds.height).toInt,
-        math.round(0.55*bounds.width).toInt, math.round(0.01*bounds.height).toInt)
 
+      //Draw the track icon with a yellow border
+      val bounds = g.getClipBounds
       val iconX = math.round(bounds.x+0.05*bounds.width).toInt
       val iconY = math.round(bounds.y+0.05*bounds.height).toInt
       val iconW = math.round(0.28*bounds.width).toInt
@@ -26,12 +26,13 @@ class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
       previewImage.foreach(img => {
         g.drawImage(img, iconX+border, iconY+border, iconW-2*border, iconH-2*border, null)
       })
+
     }
 
-    //g.fillRect((bounds.x+0.05*bounds.width).toInt, (bounds.y+0.05*bounds.height).toInt, (0.28*bounds.width).toInt, (0.28*bounds.width).toInt)
   }
 
   this.setBackground(GUIConstants.COLOR_AREA)
+
 
   private var previewImage: Option[BufferedImage] = None
   private val trackLabel = new FontLabel("", fontSize = 3F)
@@ -62,6 +63,7 @@ class TrackPreviewPanel extends JPanel with ComponentPercentBounds {
     leaderBoardsLabel.updateBounds(getBounds().width, getBounds().height)
     leaderBoards.foreach(_.updateBounds(getBounds().width, getBounds().height))
   }
+
 
   def updatePreview(track: TrackPreview) = {
 

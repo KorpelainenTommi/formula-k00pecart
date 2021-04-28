@@ -1,6 +1,10 @@
 package formula.engine
 import formula.io._
 
+//A closed path is an ordered collection of points
+//A closed loop is an ordered collection of points, where indexes loop
+
+
 object ClosedPath extends Serializer[ClosedPath] {
 
   override def save(saveable: ClosedPath) = FormulaIO.saveInt(saveable.length) ++ saveable._points.flatMap(V2D.save)
@@ -9,14 +13,6 @@ object ClosedPath extends Serializer[ClosedPath] {
     new ClosedPath(Array.tabulate(len)(i => V2D.load(bytes, start+4+i*16)))
   }
 
-
-
-  //def apply(points: V2D*) = new ClosedPath(points)
-
-}
-
-object ClosedLoop {
-  //def apply(points: V2D*) = new ClosedLoop(points)
 }
 
 class ClosedPath(points: IndexedSeq[V2D]) extends IndexedSeq[V2D] {

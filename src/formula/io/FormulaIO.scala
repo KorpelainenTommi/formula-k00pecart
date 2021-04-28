@@ -36,6 +36,7 @@ object FormulaIO {
   val STRING_SEP_BYTES = "\u00b6".getBytes(ENCODING)
 
 
+  //Hashmaps for caching resources
   val loadedFonts    = HashMap[Font, java.awt.Font]()
   val loadedTextures = HashMap[Texture, BufferedImage]()
   val loadedSounds = HashMap[Sound, Option[File]]()
@@ -90,6 +91,10 @@ object FormulaIO {
 
   }
 
+
+  //In JDK 11+ FileInputStream has a method called readAllBytes
+  //This method is used instead since it makes the application compatible
+  //with older java versions
   private def readAll(in: FileInputStream) = {
 
     val data = scala.collection.mutable.ArrayBuffer[Byte]()
@@ -204,6 +209,10 @@ object FormulaIO {
 
   }
 
+
+
+
+  //Loading music works with generic filenames
   def getMusic(filename: String) = {
 
     val path = resolvePath("data", "music", filename)
@@ -215,8 +224,6 @@ object FormulaIO {
     }
 
   }
-
-
 
 
   //Load a texture, and cache it for future access
@@ -293,6 +300,10 @@ object FormulaIO {
 
   }
 
+
+
+
+
   def listWavFiles = {
     val musicDir = new File(resolvePath("data", "music"))
     if(musicDir.exists()) {
@@ -327,75 +338,6 @@ object FormulaIO {
 
   def deleteTrack(filename: String) = {
     deleteFile(resolvePath("data", "tracks", filename))
-  }
-
-
-
-
-  def loadDemoBitSet(name: String) = {
-    val demoimg = FormulaIO.loadImage(name)
-    val raster = demoimg.getRaster
-    val buffer = raster.getDataElements(0, 0, 256, 256, null).asInstanceOf[Array[Byte]]
-    val bitSet = scala.collection.mutable.BitSet()
-    for(i <- 0 until (256*256)) {
-      if(buffer(i*4) == 0x0) bitSet.add(i)
-    }
-    bitSet
-  }
-
-  def loadDemoPath(name: String) = {
-    val demoimg = FormulaIO.loadImage(name)
-    val raster = demoimg.getRaster
-    val buffer = raster.getDataElements(0, 0, 256, 256, null).asInstanceOf[Array[Byte]]
-
-    val redDots = scala.collection.mutable.ArrayBuffer[V2D]()
-    val blueDots = scala.collection.mutable.ArrayBuffer[V2D]()
-    val greenDots = scala.collection.mutable.ArrayBuffer[V2D]()
-    var whiteDot = formula.engine.V2D(0,0)
-
-    val FULL_BITS: Byte = -1
-    val EMPTY_BITS: Byte = 0
-
-    var r: Byte = 0
-    var g: Byte = 0
-    var b: Byte = 0
-
-    for(i <- 0 until (256*256)) {
-      r = buffer(i*4)
-      g = buffer(i*4+1)
-      b = buffer(i*4+2)
-
-      if(r == FULL_BITS && g == FULL_BITS && b == FULL_BITS) {
-        whiteDot = V2D(i % Track.TRACK_WIDTH, i / Track.TRACK_HEIGHT)
-      }
-
-      else if(r == FULL_BITS) {
-        redDots += V2D(i % Track.TRACK_WIDTH, i / Track.TRACK_HEIGHT)
-      }
-
-      else if(g == FULL_BITS) {
-        greenDots += V2D(i % Track.TRACK_WIDTH, i / Track.TRACK_HEIGHT)
-      }
-
-      else if(b == FULL_BITS) {
-        blueDots += V2D(i % Track.TRACK_WIDTH, i / Track.TRACK_HEIGHT)
-      }
-    }
-
-    val points = Array.ofDim[formula.engine.V2D](redDots.length*3+1)
-    points(0) = whiteDot
-    var lastPoint = whiteDot
-    for(i <- redDots.indices) {
-      points(i*3+1) = V2D.locate(lastPoint, redDots.toVector)
-      lastPoint = points(i*3+1)
-      points(i*3+2) = V2D.locate(lastPoint, greenDots.toVector)
-      lastPoint = points(i*3+2)
-      points(i*3+3) = V2D.locate(lastPoint, blueDots.toVector)
-      lastPoint = points(i*3+3)
-    }
-
-    new ClosedLoop(points)
-
   }
 
 }

@@ -58,12 +58,13 @@ object Textures extends Resource {
   val Gear5 = Value
 
   //Animated
-  val ANIM_Oil   = Value
-  val ANIM_Smoke = Value
-  val ANIM_Speed = Value
+  val ANIM_Oil       = Value
+  val ANIM_Smoke     = Value
+  val ANIM_Speed     = Value
   val ANIM_Explosion = Value
 
 
+  //Map objects
   val OBJ_Oil   = Value
   val OBJ_Tree  = Value
   val OBJ_Rock  = Value
@@ -129,10 +130,10 @@ object Textures extends Resource {
       case Gear4 => fold("hud", "gear4.png")
       case Gear5 => fold("hud", "gear5.png")
 
+      case ANIM_Oil       => fold("animated", "smoke1.png")
+      case ANIM_Smoke     => fold("animated", "smoke0.png")
+      case ANIM_Speed     => fold("animated", "speed0.png")
       case ANIM_Explosion => fold("animated", "explosion0.png")
-      case ANIM_Smoke => fold("animated", "smoke0.png")
-      case ANIM_Speed => fold("animated", "speed0.png")
-      case ANIM_Oil   => fold("animated", "smoke1.png")
 
       case OBJ_Oil    => fold("objects", "oil0.png")
       case OBJ_Tree   => fold("objects", "tree0.png")
@@ -145,6 +146,9 @@ object Textures extends Resource {
   }
 
 }
+
+
+
 
 object Sounds extends Resource {
 
@@ -161,9 +165,11 @@ object Sounds extends Resource {
   val Skid = Value
   val Explosion = Value
 
+
   val Click = Value
   val Hover = Value
   val Results = Value
+
 
   val CountDown0 = Value
   val CountDown1 = Value
@@ -180,6 +186,9 @@ object Sounds extends Resource {
       case Click => "click0.wav"
       case Hover => "hover0.wav"
 
+      //Not all engine wav files are used, since
+      //most of the engine sounds are pretty bad...
+      //
       case Engine0 => "engine0.wav"
       case Engine1 => "engine3.wav"
       case Engine2 => "engine4.wav"
@@ -199,6 +208,10 @@ object Sounds extends Resource {
   }
 
 }
+
+
+
+
 
 object Fonts extends Resource {
   type Font = Value

@@ -11,7 +11,8 @@ class GameScreen
  playerCount: Int,
  laps: Int,
  playerNames: Vector[String],
- playerAI: Vector[Boolean], musicFilename: Option[String] = None) extends Screen with TextureLoader with SoundLoader {
+ playerAI: Vector[Boolean],
+ musicFilename: Option[String] = None) extends Screen with TextureLoader with SoundLoader {
 
   override protected def textures = Textures.GAME_TEXTURES
   override protected def sounds = Sounds.GAME_SOUNDS
@@ -52,9 +53,12 @@ class GameScreen
 
   override def handleKey(e: KeyEvent) = {
 
+    //ESC pressed, exit the game
     if(e.getID == KeyEvent.KEY_PRESSED && e.getKeyCode == KeyEvent.VK_ESCAPE) {
       MainApplication.transition(new MainMenuScreen)
     }
+
+    //Handle player input
 
     if(e.getID == KeyEvent.KEY_PRESSED) {
 
@@ -80,6 +84,8 @@ class GameScreen
         game.input(1, player2Key, false)
       }
     }
+
+
 
   }
 

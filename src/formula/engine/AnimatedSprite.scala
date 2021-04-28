@@ -4,6 +4,7 @@ import formula.io.Textures.Texture
 import java.awt.image.BufferedImage
 import scala.collection.mutable.PriorityQueue
 
+//A sprite that gets its texture from a spritesheet
 object AnimatedSprites {
 
   val animating = PriorityQueue[AnimatedSprite]()(Ordering.by(_.endTime))
@@ -53,6 +54,8 @@ class AnimatedSprite
   val frameTime = 1D / frameRate
   val endTime = startTime + (Game.TIME_PRECISION * frameCount * frameTime).toLong
 
+  //Cache the individual sprites in a spritesheet so we don't
+  //generate a ton of garbage when rendering
   protected val sprites = Array.ofDim[BufferedImage](frameCount)
   private val img = FormulaIO.getTexture(texture)
   for(i <- 0 until frameCount) {

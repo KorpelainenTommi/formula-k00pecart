@@ -9,6 +9,7 @@ trait Sprite {
   def spriteRatio: Double //Sprite aspect ratio as height / width
 }
 
+
 object Camera {
 
   //SCAN_DIST is the length of the camera frustrum

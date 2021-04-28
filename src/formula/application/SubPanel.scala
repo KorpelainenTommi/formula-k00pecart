@@ -1,6 +1,7 @@
 package formula.application
-
 import javax.swing._
+
+//A scrollable panel that can contain subcontent
 class SubPanel(heightMultiplier: Double, protected val subpanel: JPanel = new JPanel()) extends JScrollPane(subpanel) with ComponentPercentBounds {
 
   protected val components = scala.collection.mutable.ArrayBuffer[javax.swing.JComponent with PercentBounds]()
@@ -18,14 +19,15 @@ class SubPanel(heightMultiplier: Double, protected val subpanel: JPanel = new JP
   })
 
   this.getVerticalScrollBar.setUnitIncrement(20)
+  this.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
 
-    this.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
+  override def updateBounds(width: Double, height: Double) = {
+    super.updateBounds(width, height)
+    subpanel.setPreferredSize(new java.awt.Dimension(math.round(pW*width).toInt, math.round(pH*height*heightMultiplier).toInt))
+    val w = pW*width
+    val h = pH*height
+    components.foreach(_.updateBounds(w, h))
+  }
 
-    override def updateBounds(width: Double, height: Double) = {
-      super.updateBounds(width, height)
-      subpanel.setPreferredSize(new java.awt.Dimension(math.round(pW*width).toInt, math.round(pH*height*heightMultiplier).toInt))
-      val w = pW*width
-      val h = pH*height
-      components.foreach(_.updateBounds(w, h))
-    }
+
 }

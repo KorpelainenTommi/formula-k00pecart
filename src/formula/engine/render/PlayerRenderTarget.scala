@@ -1,8 +1,7 @@
 package formula.engine.render
+import formula.io._
 import formula.engine._
 import java.awt.Graphics2D
-import formula.io._
-import formula.application.MainApplication
 
 //Render players from the perspective of one player camera
 class PlayerRenderTarget(val players: Vector[Player], val camera: Camera) extends RenderTarget {

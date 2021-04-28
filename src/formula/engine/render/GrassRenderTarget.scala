@@ -3,6 +3,7 @@ import formula.engine._
 import formula.io._
 import java.awt._
 
+//Render the green ground, and a gradient emulating a distant fade
 class GrassRenderTarget extends RenderTarget {
 
   private var grassTexturePaint: Option[TexturePaint] = None

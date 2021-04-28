@@ -1,14 +1,14 @@
 package formula.engine.render
-import formula.application.GUIConstants
-import formula.engine._
-import formula.io._
-
 import java.awt._
+import formula.io._
+import formula.engine._
+import formula.application.GUIConstants
 
 //RenderTarget responsible for rendering the interactive view of the tracktool
 class TrackToolRenderTarget(val tool: TrackTool) extends RenderTarget {
 
 
+  //Color constants
   private val COLOR_DIR               = new Color( 0 , 255,  0 , 255)
   private val COLOR_GOAL              = new Color(255, 120,  0 , 255)
   private val COLOR_PATH              = new Color(255, 255,  0 , 100)

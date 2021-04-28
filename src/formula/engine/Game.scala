@@ -25,6 +25,9 @@ object Game {
  * @param track The track to race on
  * @param nOfPlayers The number of players to spawn
  * @param nOfLaps The number of laps to victory
+ * @param playerNames A vector with the chosen player names
+ * @param playerAI A vector indicating which player is an AI
+ * @param musicFilename The filename for music, or None if no music
  */
 class Game
 (val track: Track,
@@ -189,11 +192,12 @@ class Game
 
   }
 
-
+  //A player has declared victory, go to results
   def victory(playerNumber: Int) = {
 
     players.filterNot(_.playerNumber == playerNumber).foreach(_.active = false)
-    MainApplication.transition(new ResultScreen(track, ((time - startTime) / Game.CLOCK_PRECISION).toInt, nOfLaps, playerNames.take(nOfPlayers), playerNumber))
+    MainApplication.transition(new ResultScreen(track, ((time - startTime) / Game.CLOCK_PRECISION).toInt,
+      nOfLaps, playerNames.take(nOfPlayers), playerNumber))
 
   }
 }

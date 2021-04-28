@@ -43,7 +43,7 @@ class Player
   protected val soundSource = new SoundSource(Sounds.CAR_SOUNDS)
 
 
-  //Also cache all oil spills on the map
+  //Also cache all oil spills on the track
   protected val oilSpills = game.track.mapObjects.filter(_.name == "OilSpill")
 
 
@@ -52,7 +52,7 @@ class Player
   protected var _gear = 0
   protected var _turnMult = 0D
 
-  //Tracking cooldowns
+  //Keep track of different cooldowns
   protected var _lastGearShift = game.startTime
   protected var _lastDestruction = 0L
   protected var _lastCheckpoint = 0
@@ -168,6 +168,8 @@ class Player
   }
   //endregion
 
+
+
   def cooldownOff(time: Long, start: Long, duration: Double) = (time - start) / Game.TIME_PRECISION  > duration
 
   //Movement options
@@ -274,7 +276,7 @@ class Player
 
   }
 
-
+  //Begin the game with the engine idle sound
   soundSource.turnOn(Sounds.Engine0, Player.ENGINE_VOLUME)
   def update(time: Long, deltaT: Double) = {
 

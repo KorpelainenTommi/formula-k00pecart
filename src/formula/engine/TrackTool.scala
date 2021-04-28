@@ -7,12 +7,12 @@ import scala.collection.mutable.ArrayBuffer
 object TrackTool {
 
   sealed trait Mode
-
   final object NoSelection extends TrackTool.Mode
   final object DrawRoad extends TrackTool.Mode
   final object PlaceObjects extends TrackTool.Mode
   final object PlaceGoal extends TrackTool.Mode
 
+  //Constants for placing path checkpoints and mapobjects
   val PATH_POSITION_DIST = 10
   val PATH_POSITION_DIST_SQR = PATH_POSITION_DIST * PATH_POSITION_DIST
   val MAP_OBJECT_SELECTION_RADIUS = 5D
@@ -21,6 +21,7 @@ object TrackTool {
 
 class TrackTool {
 
+  //Track road graphics
   val trackImage = new BufferedImage(Track.TRACK_WIDTH, Track.TRACK_HEIGHT, BufferedImage.TYPE_INT_ARGB)
   protected val trackGraphics = trackImage.createGraphics()
 
@@ -37,9 +38,6 @@ class TrackTool {
 
     mode match {
       case TrackTool.DrawRoad if drawingTrack => trackDrawUpdate(lastPos, _mousePosition)
-      case TrackTool.PlaceGoal => {
-
-      }
       case _ =>
     }
   }
@@ -73,6 +71,7 @@ class TrackTool {
   var onTrackCompleted: () => Unit = () => {}
 
 
+  //Placing and removing mapobjects
 
   def placeObject() = {
     if(selectedMapObject != -1) {
@@ -98,6 +97,7 @@ class TrackTool {
     }
   }
 
+
   def placeGoal() = {
     if(pathPositions.nonEmpty) {
 
@@ -108,6 +108,7 @@ class TrackTool {
 
     }
   }
+
 
   def reverseTrack() = {
 
@@ -120,6 +121,7 @@ class TrackTool {
     }
   }
 
+  //Start drawing the track in road draw mode
   def beginTrackDraw() = {
     if(mousePositionValid) {
 
@@ -145,6 +147,7 @@ class TrackTool {
     }
   }
 
+  //Place checkpoints based on mouse movement
   protected def placePathPoints(pos: V2D) = {
 
     val p1 = _primaryPathPositions.last
@@ -158,6 +161,7 @@ class TrackTool {
     }
   }
 
+  //Mouse movement causes this update function to be called
   def trackDrawUpdate(pos1: V2D, pos2: V2D) = {
     val x1 = math.round(pos1.x * Track.TRACK_WIDTH).toInt
     val y1 = math.round(pos1.y * Track.TRACK_HEIGHT).toInt
@@ -177,10 +181,12 @@ class TrackTool {
     }
   }
 
+  //Track drawing was forcefully stopped
   def abortTrackDraw() = {
     MainApplication.messageBox("Track path has become invalid. Please try again")
     stopTrackDraw()
   }
+
 
   def stopTrackDraw() = {
     _drawingTrack = false
@@ -202,6 +208,9 @@ class TrackTool {
     mode = TrackTool.NoSelection
     onTrackCompleted()
   }
+
+
+
 
   def mousePositionValid = {
     val d = roadWidth / Track.TRACK_WIDTH

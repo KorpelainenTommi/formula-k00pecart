@@ -114,6 +114,7 @@ object Settings extends Serializer[Settings] {
 
   override def load(bytes: Array[Byte], start: Int) = {
 
+    //Invalid settings file, use defaults
     if(bytes.length < start + 14 + defaultPlayer1Controls.length*4 + defaultPlayer2Controls.length*4) {
       defaultSettings
     }

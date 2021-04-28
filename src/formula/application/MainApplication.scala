@@ -7,9 +7,11 @@ import formula.io.Settings
 import formula.application.screens._
 
 
-
+//The Main swing application and the starting point for the program
 object MainApplication extends App {
 
+
+  var maximized = false
 
   private var _currentScreen: Option[Screen] = None
   def currentScreen = _currentScreen
@@ -21,6 +23,7 @@ object MainApplication extends App {
 
   private var _settings: Settings = Settings.defaultSettings
   def settings = _settings
+
 
   //Initialization
 
@@ -36,6 +39,7 @@ object MainApplication extends App {
   val _topWindow = new JFrame("K00PECART", configuration)
   def topWindow = _topWindow
 
+  //Program icon
   try {
     topWindow.setIconImage(FormulaIO.loadImage("icon0.png"))
   }
@@ -47,13 +51,17 @@ object MainApplication extends App {
 
   //Set bounds for maximized borderless
   topWindow.setMaximizedBounds(configuration.getBounds)
+
+
   transition(new MainMenuScreen())
 
-  var maximized = false
+
 
   private def setState(i: Int) = {
     topWindow.setExtendedState(topWindow.getExtendedState | i)
   }
+
+
   def minimize() = setState(java.awt.Frame.ICONIFIED)
 
   def normalize() = {
@@ -104,14 +112,17 @@ object MainApplication extends App {
   def windowHeight = if(maximized) configuration.getBounds.height else topWindow.getContentPane.getHeight
 
 
+  //A popup message
   def messageBox(message: String) = {
     JOptionPane.showMessageDialog(topWindow, message)
   }
 
+  //A popup question
   def confirmBox(message: String) = {
     JOptionPane.showConfirmDialog(topWindow, message, "Are you sure?", JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION
   }
 
+  //Creates a popup message, then calls the given action on it
   def modalActionBox(message: String, action: JDialog => Unit) = {
     val pane = new JOptionPane()
     pane.setMessageType(JOptionPane.INFORMATION_MESSAGE)
@@ -121,29 +132,12 @@ object MainApplication extends App {
     dialog.setVisible(true)
   }
 
+
+
   //Hook up keyEvents
   KeyboardFocusManager.getCurrentKeyboardFocusManager.addKeyEventDispatcher(e => {
     currentScreen.foreach(_.handleKey(e))
     false
   })
-
-
-
-
-  /*
-  val bufImg = javax.imageio.ImageIO.read(new java.io.File(FormulaIO.resolvePath("data", "textures", "goal0.png")))
-  var offs = 0
-
-
-  topWindow.getContentPane.add(new JPanel(){
-    override def paintComponent(g: Graphics): Unit = {
-      super.paintComponent(g)
-      val g2d = g.asInstanceOf[Graphics2D]
-      g2d.setPaint(new TexturePaint(bufImg, new Rectangle(0, offs, bufImg.getWidth, bufImg.getHeight)))
-      g2d.fill(new Rectangle(0, 0, getWidth, getHeight))
-    }
-  })
-  */
-
 
 }
