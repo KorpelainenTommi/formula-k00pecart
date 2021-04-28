@@ -11,12 +11,13 @@ class GameScreen
  playerCount: Int,
  laps: Int,
  playerNames: Vector[String],
- playerAI: Vector[Boolean]) extends Screen with TextureLoader {
+ playerAI: Vector[Boolean], musicFilename: Option[String] = None) extends Screen with TextureLoader with SoundLoader {
 
   override protected def textures = Textures.GAME_TEXTURES
+  override protected def sounds = Sounds.GAME_SOUNDS
 
 
-  val game = new Game(track, playerCount, laps, playerNames, playerAI)
+  val game = new Game(track, playerCount, laps, playerNames, playerAI, musicFilename: Option[String])
 
   //Create a splitscreen for game rendering
   val mainRenderTarget = new SplitscreenRenderTarget(() => game.gameUpdate())
@@ -41,6 +42,7 @@ class GameScreen
   override def deactivate() = {
     super.deactivate()
     FormulaIO.unloadAllTextures()
+    FormulaIO.unloadAllSounds()
   }
 
   override def redraw() = {

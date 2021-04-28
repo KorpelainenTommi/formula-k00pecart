@@ -86,7 +86,15 @@ class PlayerNamingScreen(track: Track) extends StaticScreen(Textures.Background_
     player2AIDropdown.percentPosition = (0.8, 0.45)
     components += player2AIDropdown
 
+    val musicLabel = new FontLabel("Background music: ", fontSize = 1.3F)
+    musicLabel.percentPosition = (0.55, 0.7)
+    components += musicLabel
 
+    val musicFiles = FormulaIO.listWavFiles
+
+    val musicDropdown = new DropDown("No music" +: musicFiles)
+    musicDropdown.percentPosition = (0.75, 0.7)
+    components += musicDropdown
 
     val raceButton = new GrayButton("RACE!", () => {
 
@@ -103,7 +111,9 @@ class PlayerNamingScreen(track: Track) extends StaticScreen(Textures.Background_
 
       val playerAI = Vector(player1AI, player2AI)
 
-      MainApplication.transition(new GameScreen(track, playerCount, laps, playerNames, playerAI))
+      val musicIndex = if(musicDropdown.getSelectedIndex == 0) None else Some(musicDropdown.getSelectedIndex)
+      val music = musicIndex.map(i => musicFiles(i - 1))
+      MainApplication.transition(new GameScreen(track, playerCount, laps, playerNames, playerAI, music))
 
     })
     raceButton.percentPosition = (0.55, 0.85)
@@ -113,6 +123,11 @@ class PlayerNamingScreen(track: Track) extends StaticScreen(Textures.Background_
     backButton.percentPosition = (0.8, 0.85)
     components += backButton
 
+  }
+
+  override def deactivate() = {
+    super.deactivate()
+    FormulaIO.unloadAllTextures()
   }
 
 }

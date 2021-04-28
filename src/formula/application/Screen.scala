@@ -1,5 +1,6 @@
 package formula.application
 import formula.io.Textures.Texture
+import formula.io.Sounds
 abstract class Screen {
   def panel: javax.swing.JPanel
   def activate() = {
@@ -19,9 +20,11 @@ abstract class Screen {
   def handleKey(e: java.awt.event.KeyEvent) = {}
 }
 
-abstract class StaticScreen(backgroundTexture: Texture, textureList: Texture*) extends Screen with BackgroundPanel with TextureLoader {
+abstract class StaticScreen(backgroundTexture: Texture, textureList: Texture*)
+  extends Screen with BackgroundPanel with TextureLoader with SoundLoader {
   override protected def background = backgroundTexture
   override protected def textures = textureList
+  override protected def sounds = Vector(Sounds.Click, Sounds.Hover)
   override def panel = _panel
 
   protected val components = scala.collection.mutable.ArrayBuffer[javax.swing.JComponent with PercentBounds]()

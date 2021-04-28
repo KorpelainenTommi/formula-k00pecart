@@ -1,4 +1,5 @@
 package formula.engine
+import formula.engine.Player.MAX_GEAR
 import formula.io._
 
 object Player {
@@ -12,6 +13,10 @@ object Player {
   val DESTRUCTION_COOLDOWN = 1.3D
   val EFFECT_COOLDOWN = 0.1D
   val OIL_COOLDOWN = 1D
+
+  //Volumes
+  val ENGINE_VOLUME = 0.1D
+  val SKID_VOLUME = 0.15
 
   //CAMERA_DISTANCE is the distance at which the camera follows the player
   //PLAYER_SIZE determines the scale of the player for rendering and game logic
@@ -32,6 +37,10 @@ class Player
   protected val checkpointSqrDist = game.track.roadWidth * game.track.roadWidth * 1.7D //Give a bit of leeway for good measure
   protected val _camera = new Camera
   _camera.position = initialPosition - initialDirection * Player.CAMERA_DISTANCE
+
+
+  //SoundSource
+  protected val soundSource = new SoundSource(Sounds.CAR_SOUNDS)
 
 
   //Also cache all oil spills on the map
@@ -103,6 +112,8 @@ class Player
 
 
 
+
+
   //texture isn't really used, since player textures should depend on direction
   //But since Player is a sprite, it needs to implement this.
   //Player rendering uses dirTexture instead
@@ -157,7 +168,6 @@ class Player
   }
   //endregion
 
-
   def cooldownOff(time: Long, start: Long, duration: Double) = (time - start) / Game.TIME_PRECISION  > duration
 
   //Movement options
@@ -166,9 +176,11 @@ class Player
   def shiftGearUp(time: Long, deltaT: Double) = {
 
     if(!shiftOnCooldown(time)) {
+      soundSource.turnOff(Sounds.ENGINE_SOUNDS(math.abs(gear)))
       gear += 1
       if(gear > Player.MAX_GEAR) gear = Player.MAX_GEAR
       _lastGearShift = time
+      soundSource.turnOn(Sounds.ENGINE_SOUNDS(math.abs(gear)), Player.ENGINE_VOLUME)
     }
 
   }
@@ -176,9 +188,11 @@ class Player
   def shiftGearDown(time: Long, deltaT: Double) = {
 
     if(!shiftOnCooldown(time)) {
+      soundSource.turnOff(Sounds.ENGINE_SOUNDS(math.abs(gear)))
       gear -= 1
       if(gear < -1) gear = -1
       _lastGearShift = time
+      soundSource.turnOn(Sounds.ENGINE_SOUNDS(math.abs(gear)), Player.ENGINE_VOLUME)
     }
 
   }
@@ -196,6 +210,8 @@ class Player
   //Destroy the visible player car
   def destroy(destructionTime: Long) = {
 
+    soundSource.turnAllOff()
+    soundSource.playOnce(Sounds.Explosion, 1)
     AnimatedSprites.spawnSprite(AnimatedSprites.Explosion, _position, 7D, destructionTime)
     destroyed = true
     active = false
@@ -208,6 +224,7 @@ class Player
   //Respawn the player at the last checkpoint they crossed
   def respawn() = {
 
+    soundSource.turnOn(Sounds.Engine0, Player.ENGINE_VOLUME)
     _position = game.track.primaryPath(_lastCheckpoint)
     _direction = game.track.primaryPath.directionNormalized(_lastCheckpoint)
     destroyed = false
@@ -258,8 +275,7 @@ class Player
   }
 
 
-
-
+  soundSource.turnOn(Sounds.Engine0, Player.ENGINE_VOLUME)
   def update(time: Long, deltaT: Double) = {
 
     if(destroyed && cooldownOff(time, _lastDestruction, Player.DESTRUCTION_COOLDOWN)) {
@@ -295,6 +311,14 @@ class Player
           AnimatedSprites.spawnSprite(AnimatedSprites.Speed, _position - _direction * scale * 0.1, 4D, time)
         }
 
+      }
+
+      //Play skid sound
+      if((turnLeft || turnRight) && math.abs(gear) > 0 && oiled) {
+        soundSource.turnOn(Sounds.Skid, Player.SKID_VOLUME)
+      }
+      else {
+        soundSource.turnOff(Sounds.Skid)
       }
 
     }

@@ -1,6 +1,7 @@
 package formula.io
 import java.io._
 import Fonts.Font
+import Sounds.Sound
 import javax.imageio._
 import formula.engine._
 import Textures.Texture
@@ -37,6 +38,7 @@ object FormulaIO {
 
   val loadedFonts    = HashMap[Font, java.awt.Font]()
   val loadedTextures = HashMap[Texture, BufferedImage]()
+  val loadedSounds = HashMap[Sound, Option[File]]()
 
 
   val defaultFont = new javax.swing.JLabel().getFont
@@ -190,6 +192,30 @@ object FormulaIO {
 
   }
 
+  def loadSound(filename: String) = {
+
+    val path = resolvePath("data", "sounds", filename)
+    try {
+      new File(path)
+    }
+    catch {
+      case _: IOException => throw new ResourceLoadException(path)
+    }
+
+  }
+
+  def getMusic(filename: String) = {
+
+    val path = resolvePath("data", "music", filename)
+    try {
+      Some(new File(path))
+    }
+    catch {
+      case _: IOException => None
+    }
+
+  }
+
 
 
 
@@ -242,13 +268,49 @@ object FormulaIO {
   }
 
 
+  def getSound(s: Sound) = {
 
+    if(!loadedSounds.contains(s)) {
+      try {
+        loadedSounds(s) = Some(loadSound(Sounds.path(s)))
+      }
+      catch {
+        case e: ResourceLoadException => {
+          loadedSounds(s) = None
+          MainApplication.messageBox(e.getMessage)
+        }
+      }
+    }
+
+    loadedSounds(s)
+  }
+
+
+  def unloadAllSounds() = {
+
+    SoundSystem.cleanUpAll()
+    loadedSounds.clear()
+
+  }
+
+  def listWavFiles = {
+    val musicDir = new File(resolvePath("data", "music"))
+    if(musicDir.exists()) {
+      musicDir.listFiles(new FilenameFilter {
+        override def accept(dir: File, name: String) = name.endsWith(".wav")
+      }).map(_.getName).toVector
+    }
+    else Vector()
+  }
 
   def listTrackFiles = {
     val trackDir = new File(resolvePath("data", "tracks"))
-    trackDir.listFiles(new FilenameFilter {
-      override def accept(dir: File, name: String) = name.endsWith(".trck")
-    }).map(_.getName).toVector
+    if(trackDir.exists()) {
+      trackDir.listFiles(new FilenameFilter {
+        override def accept(dir: File, name: String) = name.endsWith(".trck")
+      }).map(_.getName).toVector
+    }
+    else Vector()
   }
 
   def loadTrackPreview(filename: String) = {

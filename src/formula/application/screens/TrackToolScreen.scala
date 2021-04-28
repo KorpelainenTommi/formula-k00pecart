@@ -23,7 +23,7 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
     trackWidthLabel.percentBounds = (0.475, 0.15, 0.15, 0.03)
     components += trackWidthLabel
 
-    val trackWidthSlider = new Slider(isVertical = true, minValue = math.ceil(Player.PLAYER_SIZE * 2).toInt, maxValue = 30, onchange = (value: Int) => {
+    val trackWidthSlider = new Slider(20, isVertical = true, minValue = math.ceil(Player.PLAYER_SIZE * 2).toInt, maxValue = 30, onchange = (value: Int) => {
       if(!trackTool.drawingTrack && !trackTool.roadCompleted) {
         trackTool.roadWidth = value
         renderPanel.repaint()
@@ -265,6 +265,7 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
   override def deactivate(): Unit = {
     tool.foreach(_.exit())
     super.deactivate()
+    FormulaIO.unloadAllTextures()
   }
 
 }

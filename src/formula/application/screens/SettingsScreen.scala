@@ -20,7 +20,7 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
     val subW = 0.75
     val subH = 0.8
 
-    val subPanel = new SubPanel(1.5)
+    val subPanel = new SubPanel(2)
     subPanel.percentBounds = (0.025, 0.1, subW, subH)
     components += subPanel
 
@@ -92,10 +92,10 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
 
     val keyLabels = Vector("Steer left:", "Steer right:", "Gear up:", "Gear down:")
     val keyNames1 = Array.ofDim[FontLabel](Settings.defaultPlayer1Controls.length)
-    val keyCodes1 = MainApplication.settings.player1Controls.clone()
+    val keyCodes1 = MainApplication.settings.player1Controls.toArray
 
     val keyNames2 = Array.ofDim[FontLabel](Settings.defaultPlayer2Controls.length)
-    val keyCodes2 = MainApplication.settings.player2Controls.clone()
+    val keyCodes2 = MainApplication.settings.player2Controls.toArray
 
     for(i <- Settings.defaultPlayer1Controls.indices) {
 
@@ -150,6 +150,27 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
     }
 
 
+    val audioLabel = new FontLabel("A U D I O", fontSize = 2.3F, fontColor = GUIConstants.COLOR_HEADER)
+    audioLabel.percentSize = (2*GUIConstants.TEXTFIELD_WIDTH/subW, GUIConstants.TEXTFIELD_HEIGHT/subH)
+    audioLabel.percentPosition = (0.4, 1.5)
+    subPanel.addComponent(audioLabel)
+
+    val volumeLabel = new FontLabel("Volume", fontSize = 1.8F)
+    volumeLabel.percentSize = (2*GUIConstants.TEXTFIELD_WIDTH/subW, GUIConstants.TEXTFIELD_HEIGHT/subH)
+    volumeLabel.percentPosition = (0.4, 1.7)
+    subPanel.addComponent(volumeLabel)
+
+    def tickSound(volume: Int) = {
+      formula.engine.SoundSystem.playSound(Sounds.Hover, volume)
+    }
+
+    val volumeSlider = new Slider(MainApplication.settings.volume, minValue = 0, maxValue = 100, majorSpacing = 10, onchange = tickSound)
+    volumeSlider.percentSize = (0.8, GUIConstants.TEXTFIELD_HEIGHT/subH)
+    volumeSlider.percentPosition = (0.05, 1.8)
+    subPanel.addComponent(volumeSlider)
+
+
+
     //Navigation buttons
 
     val restoreButton = new GrayButton("Default", () => {
@@ -171,38 +192,45 @@ class SettingsScreen extends StaticScreen(Textures.Background_Generic, Textures.
     components += restoreButton
 
     val saveButton = new GrayButton("Save changes", () => {
+
       var targetFramerate = math.abs(fpsValue.getText.toIntOption.getOrElse(MainApplication.settings.targetFramerate))
       if(targetFramerate == 0) targetFramerate = MainApplication.settings.targetFramerate
       fpsValue.setText(targetFramerate.toString)
+
+
       val newSettings = Settings(resolutionDropdown.getSelectedIndex,
-        screenDropdown.getSelectedIndex == 1, keyCodes1, keyCodes2, targetFramerate, effectsDropdown.getSelectedIndex == 0)
+        screenDropdown.getSelectedIndex == 1, keyCodes1.toVector, keyCodes2.toVector, targetFramerate,
+        effectsDropdown.getSelectedIndex == 0, volumeSlider.getValue)
+
       val success = FormulaIO.saveSettings(newSettings)
+
       if(success) {
         MainApplication.updateSettings(newSettings)
         MainApplication.messageBox("Settings saved succesfully")
       }
-
       else {
         MainApplication.messageBox("Failed to save settings")
       }
+
     })
     saveButton.percentPosition = (0.8, 0.7)
     components += saveButton
 
     val backButton = new GrayButton("Back", () => {
+
       var targetFramerate = math.abs(fpsValue.getText.toIntOption.getOrElse(MainApplication.settings.targetFramerate))
       if(targetFramerate == 0) targetFramerate = MainApplication.settings.targetFramerate
       fpsValue.setText(targetFramerate.toString)
-      val newSettings = Settings(resolutionDropdown.getSelectedIndex,
-        screenDropdown.getSelectedIndex == 1, keyCodes1, keyCodes2, targetFramerate, effectsDropdown.getSelectedIndex == 0)
-      val controlsChanged = !keyCodes1.sameElements(MainApplication.settings.player1Controls) || !keyCodes2.sameElements(MainApplication.settings.player2Controls)
 
-      if(controlsChanged ||
-        newSettings.resolution != MainApplication.settings.resolution ||
-        newSettings.fullScreen != MainApplication.settings.fullScreen ||
-        newSettings.effects    != MainApplication.settings.effects    ||
-        newSettings.targetFramerate != MainApplication.settings.targetFramerate) {
-        if(MainApplication.confirmBox("You have unsaved settings that will be discarded. Exit anyway?")) MainApplication.transition(new MainMenuScreen)
+      val newSettings = Settings(resolutionDropdown.getSelectedIndex,
+        screenDropdown.getSelectedIndex == 1, keyCodes1.toVector, keyCodes2.toVector, targetFramerate,
+        effectsDropdown.getSelectedIndex == 0, volumeSlider.getValue)
+
+      //Compare case classes
+      if(newSettings != MainApplication.settings) {
+        if(MainApplication.confirmBox("You have unsaved settings that will be discarded. Exit anyway?")) {
+          MainApplication.transition(new MainMenuScreen)
+        }
       }
 
       else {

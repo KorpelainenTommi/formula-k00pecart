@@ -31,7 +31,8 @@ class Game
  val nOfPlayers: Int,
  val nOfLaps: Int,
  val playerNames: Vector[String] = Vector("Player 1", "Player 2"),
- val playerAI: Vector[Boolean] = Vector(false, false)) {
+ val playerAI: Vector[Boolean] = Vector(false, false),
+ val musicFilename: Option[String] = None) {
 
 
   //Player variables and methods
@@ -87,6 +88,7 @@ class Game
 
   private var _gameStarted   = false
   private var _clockStarted  = false
+  private var _countDown = 0
 
 
   def time         = _lastFrameTime
@@ -157,9 +159,24 @@ class Game
       players.foreach(_.update(time, elapsedTime / Game.TIME_PRECISION))
 
 
+      //Countdown
+
+      if(_countDown == 0) {
+        SoundSystem.playSound(Sounds.CountDown0)
+        _countDown = 1
+      }
+
+      else if(!clockStarted && _countDown == 1 && (time - startTime) / Game.TIME_PRECISION > Game.GAME_COUNTDOWN / 2) {
+        SoundSystem.playSound(Sounds.CountDown0)
+        _countDown = 2
+      }
+
+
       //Countdown over
       //Activate the players and start the clock
       if(!clockStarted && (time - startTime) / Game.TIME_PRECISION > Game.GAME_COUNTDOWN) {
+        SoundSystem.playSound(Sounds.CountDown1)
+        musicFilename.foreach(SoundSystem.playMusic)
         players.foreach(_.active = true)
         _startTime = time
         _clockStarted = true

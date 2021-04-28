@@ -20,14 +20,16 @@ trait Serializer[T] {
  * @param player2Controls Array of virtual keys for player2
  * @param targetFramerate Desired framerate for the game
  * @param effects Controls whether the game will render animated effects on cars
+ * @param volume Master volume from 0-100
  */
 case class Settings
 (resolution: Int,
  fullScreen: Boolean,
- player1Controls: Array[Int],
- player2Controls: Array[Int],
+ player1Controls: Vector[Int],
+ player2Controls: Vector[Int],
  targetFramerate: Int,
- effects: Boolean) {
+ effects: Boolean,
+ volume: Int) {
   def screenSize = Settings.resolutions(if(resolution < 0 || resolution >= Settings.resolutions.length) 0 else resolution)
 }
 
@@ -93,11 +95,11 @@ object Settings extends Serializer[Settings] {
     }
   }
 
-  val defaultPlayer1Controls = Array(KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_W, KeyEvent.VK_S)
-  val defaultPlayer2Controls = Array(KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_UP, KeyEvent.VK_DOWN)
+  val defaultPlayer1Controls = Vector(KeyEvent.VK_A, KeyEvent.VK_D, KeyEvent.VK_W, KeyEvent.VK_S)
+  val defaultPlayer2Controls = Vector(KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_UP, KeyEvent.VK_DOWN)
 
 
-  def defaultSettings = Settings(0, false, defaultPlayer1Controls, defaultPlayer2Controls, 150, true)
+  def defaultSettings = Settings(0, false, defaultPlayer1Controls, defaultPlayer2Controls, 150, true, 30)
 
 
   override def save(saveable: Settings) = {
@@ -106,12 +108,13 @@ object Settings extends Serializer[Settings] {
     saveable.player1Controls.flatMap(FormulaIO.saveInt(_)) ++
     saveable.player2Controls.flatMap(FormulaIO.saveInt(_)) ++
     FormulaIO.saveInt(saveable.targetFramerate) ++
-    Array[Byte](if(saveable.effects) 1 else 0)
+    Array[Byte](if(saveable.effects) 1 else 0) ++
+    FormulaIO.saveInt(saveable.volume)
   }
 
   override def load(bytes: Array[Byte], start: Int) = {
 
-    if(bytes.length < start + 10 + defaultPlayer1Controls.length*4 + defaultPlayer2Controls.length*4) {
+    if(bytes.length < start + 14 + defaultPlayer1Controls.length*4 + defaultPlayer2Controls.length*4) {
       defaultSettings
     }
 
@@ -120,13 +123,13 @@ object Settings extends Serializer[Settings] {
       val resolution = FormulaIO.loadInt(bytes, 1)
       var idx = 5
 
-      val player1Controls = Array.tabulate[Int](defaultPlayer1Controls.length)(i => {
+      val player1Controls = Vector.tabulate[Int](defaultPlayer1Controls.length)(i => {
         val keycode = FormulaIO.loadInt(bytes, idx)
         idx += 4
         keycode
       })
 
-      val player2Controls = Array.tabulate[Int](defaultPlayer2Controls.length)(i => {
+      val player2Controls = Vector.tabulate[Int](defaultPlayer2Controls.length)(i => {
         val keycode = FormulaIO.loadInt(bytes, idx)
         idx += 4
         keycode
@@ -136,9 +139,12 @@ object Settings extends Serializer[Settings] {
       idx += 4
       if(targetFramerate <= 0) targetFramerate = defaultSettings.targetFramerate
       val effects = bytes(start + idx) != 0
+      idx += 1
+      val volume = math.max(math.min(math.abs(FormulaIO.loadInt(bytes, idx)), 100), 0)
+      idx += 4
 
       Settings(if(resolution<0 || resolution>resolutions.length-1) 0 else resolution,
-        fullScreen, player1Controls, player2Controls, targetFramerate, effects)
+        fullScreen, player1Controls, player2Controls, targetFramerate, effects, volume)
     }
 
   }

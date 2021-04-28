@@ -1,19 +1,16 @@
 package formula.application
-
-import formula.application.screens.MainMenuScreen
-import formula.io.FormulaIO
-import formula.io.Settings
-
-import java.awt.KeyboardFocusManager
-import java.awt.event.WindowEvent
-import javax.sound.sampled.FloatControl
+import java.awt._
+import formula.io._
 import javax.swing._
+import java.awt.event._
+import formula.io.Settings
+import formula.application.screens._
 
 
 
 object MainApplication extends App {
 
-  //public members and functions
+
   private var _currentScreen: Option[Screen] = None
   def currentScreen = _currentScreen
   def transition(screen: Screen) = {
@@ -27,7 +24,7 @@ object MainApplication extends App {
 
   //Initialization
 
-  private val graphicsEnvironment = java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment
+  private val graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment
   private val configuration = graphicsEnvironment.getDefaultScreenDevice.getDefaultConfiguration
 
   //Register fonts
@@ -130,26 +127,8 @@ object MainApplication extends App {
     false
   })
 
-  /* Sample code for adding audio system later
 
-  protected var clip: Option[javax.sound.sampled.Clip] = None
 
-  def testMusic() = {
-
-    val strm = javax.sound.sampled.AudioSystem.getAudioInputStream(new java.io.File(FormulaIO.resolvePath("data", "drivin.wav")))
-    clip = Some(javax.sound.sampled.AudioSystem.getClip)
-    clip.get.open(strm)
-    val control = clip.get.getControl(javax.sound.sampled.FloatControl.Type.MASTER_GAIN).asInstanceOf[FloatControl]
-    control.setValue(-25.0F)
-    clip.get.start()
-
-  }
-
-  def stopMusic() = {
-    clip.foreach(_.stop())
-  }
-
-  */
 
   /*
   val bufImg = javax.imageio.ImageIO.read(new java.io.File(FormulaIO.resolvePath("data", "textures", "goal0.png")))

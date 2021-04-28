@@ -2,7 +2,6 @@ package formula.engine
 import formula.io._
 import formula.io.Textures.Texture
 import java.awt.image.BufferedImage
-
 import scala.collection.mutable.PriorityQueue
 
 object AnimatedSprites {

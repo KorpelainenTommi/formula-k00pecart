@@ -103,6 +103,13 @@ class ResultScreen
       }
     }
 
+    SoundSystem.playSound(Sounds.Results)
+
+  }
+
+  override def deactivate(): Unit = {
+    super.deactivate()
+    FormulaIO.unloadAllSounds()
   }
 
 }

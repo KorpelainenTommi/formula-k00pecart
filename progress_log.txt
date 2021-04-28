@@ -11,8 +11,8 @@
 15.3 - 29.3 Rendering system for game, swing layouts for screens ready //DONE
 30.3 - 6.4 Game logic, testing and tweaking //TODO: after the track tool is ready, rest of the game functionality will be implemented
 7.4 - 15.4 Track tool // TODO: Track tool is still in the works, but the main track creation functionality is tested and working
-SCHEDULE CHANGED 16.4 - 22.4 (from 16.4 - 19.4) Finishing up and testing
-SCHEDULE CHANGED 22.4 - 28.4 (from 19.4-28.4) Documentation, polishing
+SCHEDULE CHANGED 16.4 - 22.4 (from 16.4 - 19.4) Finishing up and testing //DONE
+SCHEDULE CHANGED 22.4 - 28.4 (from 19.4-28.4) Documentation, polishing //DONE
 
 
 

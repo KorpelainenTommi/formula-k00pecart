@@ -5,6 +5,7 @@ package formula.io
  */
 trait Resource extends Enumeration {
   def path(r: Value): String
+  protected def fold(parts: String*) = FormulaIO.resolveNameS(parts)
 }
 
 
@@ -88,9 +89,6 @@ object Textures extends Resource {
 
   val GAME_TEXTURES = TRACK_TEXTURES ++ CAR_RED_TEXTURES ++ CAR_ORANGE_TEXTURES ++ HUD_TEXTURES ++ OBJ_TEXTURES ++ ANIM_TEXTURES
 
-
-  private def fold(parts: String*) = FormulaIO.resolveNameS(parts)
-
   def path(t: Texture) = {
 
     t match {
@@ -142,6 +140,60 @@ object Textures extends Resource {
       case OBJ_Tuft0  => fold("objects", "tuft0.png")
       case OBJ_Tuft1  => fold("objects", "tuft1.png")
       case OBJ_Tuft2  => fold("objects", "tuft2.png")
+    }
+
+  }
+
+}
+
+object Sounds extends Resource {
+
+  type Sound = Value
+
+  val Engine0 = Value
+  val Engine1 = Value
+  val Engine2 = Value
+  val Engine3 = Value
+  val Engine4 = Value
+  val Engine5 = Value
+
+
+  val Skid = Value
+  val Explosion = Value
+
+  val Click = Value
+  val Hover = Value
+  val Results = Value
+
+  val CountDown0 = Value
+  val CountDown1 = Value
+
+
+  val ENGINE_SOUNDS = Vector(Engine0, Engine1, Engine2, Engine3, Engine4, Engine5)
+  val CAR_SOUNDS    = ENGINE_SOUNDS ++ Vector(Skid, Explosion)
+  val GAME_SOUNDS   = CAR_SOUNDS ++ Vector(CountDown0, CountDown1)
+
+  def path(s: Sound) = {
+
+    s match {
+
+      case Click => "click0.wav"
+      case Hover => "hover0.wav"
+
+      case Engine0 => "engine0.wav"
+      case Engine1 => "engine3.wav"
+      case Engine2 => "engine4.wav"
+      case Engine3 => "engine4.wav"
+      case Engine4 => "engine5.wav"
+      case Engine5 => "engine5.wav"
+
+      case Skid => "skid0.wav"
+      case Explosion => "explosion0.wav"
+
+      case CountDown0 => "countdown0.wav"
+      case CountDown1 => "countdown1.wav"
+      case Results => "results0.wav"
+
     }
 
   }

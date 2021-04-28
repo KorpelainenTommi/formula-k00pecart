@@ -1,15 +1,23 @@
 import javax.swing._
 import formula.io._
-import java.awt.{Graphics, Color}
-import java.awt.image.BufferedImage
 import java.awt.event._
+import java.awt.{Graphics, Color}
+import formula.engine.SoundSystem
+import java.awt.image.BufferedImage
 package formula.application {
 
 
   trait TextureLoader {
     protected def textures: Seq[Textures.Texture]
     protected def loadTextures() = {
-      textures.foreach(t => FormulaIO.getTexture(t))
+      textures.foreach(FormulaIO.getTexture)
+    }
+  }
+
+  trait SoundLoader {
+    protected def sounds: Seq[Sounds.Sound]
+    protected def loadSounds() = {
+      sounds.foreach(FormulaIO.getSound)
     }
   }
 
@@ -101,13 +109,14 @@ package formula.application {
   }
 
   class Slider
-  (val isVertical: Boolean = false,
+  (initialValue: Int,
+   val isVertical: Boolean = false,
    val minValue: Int = 0,
    val maxValue: Int = 10,
    val minorSpacing: Int = 1,
    val majorSpacing: Int = 5,
    protected var onchange: Int => Unit = _ => ())
-   extends JSlider(if(isVertical) SwingConstants.VERTICAL else SwingConstants.HORIZONTAL, minValue, maxValue, minValue + (maxValue-minValue) / 2) with ComponentPercentBounds {
+   extends JSlider(if(isVertical) SwingConstants.VERTICAL else SwingConstants.HORIZONTAL, minValue, maxValue, initialValue) with ComponentPercentBounds {
     override def component = this
     this.setMinorTickSpacing(minorSpacing)
     this.setMajorTickSpacing(majorSpacing)
@@ -156,12 +165,14 @@ package formula.application {
     private val button = this
     this.addMouseListener(new MouseAdapter() {
       override def mouseEntered(e: MouseEvent) = {
+        SoundSystem.playSound(Sounds.Hover)
         button.setBackground(hoverColor)
       }
       override def mouseExited(e: MouseEvent) = {
         button.setBackground(defaultColor)
       }
       override def mousePressed(e: MouseEvent) = {
+        SoundSystem.playSound(Sounds.Click)
         button.setBackground(pressedColor)
         clicked()
         onclick()
@@ -244,6 +255,11 @@ package formula.application {
     protected val fontSize = 1F
 
     this.percentSize = (GUIConstants.BUTTON_WIDTH, GUIConstants.BUTTON_HEIGHT)
+    this.addItemListener(e => {
+      if(e.getStateChange == ItemEvent.SELECTED) {
+        SoundSystem.playSound(Sounds.Click)
+      }
+    })
 
   }
 
@@ -262,7 +278,12 @@ package formula.application {
     imageList.setVisibleRowCount(-1)
     imageList.setBackground(GUIConstants.COLOR_AREA)
 
-    imageList.addListSelectionListener(e => if (!e.getValueIsAdjusting) onSelect(imageList.getSelectedIndex))
+    imageList.addListSelectionListener(e => {
+      if(!e.getValueIsAdjusting) {
+        SoundSystem.playSound(Sounds.Click)
+        onSelect(imageList.getSelectedIndex)
+      }
+    })
 
     this.getVerticalScrollBar.setUI(new javax.swing.plaf.basic.BasicScrollBarUI(){
       override protected def configureScrollBarColors() = this.thumbColor = GUIConstants.COLOR_SCROLLBAR
