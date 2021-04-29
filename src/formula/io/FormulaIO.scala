@@ -295,7 +295,8 @@ object FormulaIO {
 
   def unloadAllSounds() = {
 
-    SoundSystem.cleanUpAll()
+    SoundSystem.stopAllSounds()
+    SoundSystem.clearSoundSources()
     loadedSounds.clear()
 
   }

@@ -5,3 +5,4 @@ out/
 null/
 project/
 target/
+data/music/*.wav

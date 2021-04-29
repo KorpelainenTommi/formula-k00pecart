@@ -74,9 +74,7 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
           trackTool.placeGoal()
           renderPanel.repaint()
         }
-      }
 
-      override def mouseClicked(e: MouseEvent): Unit = {
         if(trackTool.mode == TrackTool.PlaceObjects) {
 
           if(e.getButton == MouseEvent.BUTTON1) trackTool.placeObject()
@@ -85,6 +83,7 @@ class TrackToolScreen extends StaticScreen(Textures.Background_Generic, Textures
 
         }
       }
+
 
       override def mouseWheelMoved(e: MouseWheelEvent): Unit = {
         if(!trackTool.drawingTrack && (trackTool.mode == TrackTool.DrawRoad) && !trackTool.roadCompleted) {

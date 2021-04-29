@@ -34,7 +34,7 @@ class Player
 
   //Constants
   private val carTextures = if(playerNumber == 0) Textures.CAR_RED_TEXTURES else Textures.CAR_ORANGE_TEXTURES
-  protected val checkpointSqrDist = game.track.roadWidth * game.track.roadWidth * 1.7D //Give a bit of leeway for good measure
+  protected val checkpointSqrDist = game.track.roadWidth * game.track.roadWidth * 1.3D //Give a bit of leeway for good measure
   protected val _camera = new Camera
   _camera.position = initialPosition - initialDirection * Player.CAMERA_DISTANCE
 
@@ -106,8 +106,8 @@ class Player
 
   protected def calculateTurnMult: Double = {
     if(gear == 0) 0D
-    else if(gear <= 1) 0.5 * Player.MAX_GEAR
-    else 0.5 * (1 + Player.MAX_GEAR - gear)
+    else if(gear <= 1) 0.5 * Player.MAX_GEAR + 2
+    else 0.5 * (1 + Player.MAX_GEAR - gear) + 2
   }
 
 
@@ -212,12 +212,12 @@ class Player
   //Destroy the visible player car
   def destroy(destructionTime: Long) = {
 
+    gear = 0
     soundSource.turnAllOff()
     soundSource.playOnce(Sounds.Explosion, 1)
     AnimatedSprites.spawnSprite(AnimatedSprites.Explosion, _position, 7D, destructionTime)
     destroyed = true
     active = false
-    gear = 0
     _lastDestruction = destructionTime
 
   }
@@ -226,7 +226,7 @@ class Player
   //Respawn the player at the last checkpoint they crossed
   def respawn() = {
 
-    soundSource.turnOn(Sounds.Engine0, Player.ENGINE_VOLUME)
+    soundSource.turnOn(Sounds.ENGINE_SOUNDS(math.abs(gear)), Player.ENGINE_VOLUME)
     _position = game.track.primaryPath(_lastCheckpoint)
     _direction = game.track.primaryPath.directionNormalized(_lastCheckpoint)
     destroyed = false
@@ -253,13 +253,6 @@ class Player
   //Check the goal more precisely by getting our y coordinate in the goal direction
   def handleCheckpoints() = {
 
-    //Closest checkpoint to us
-    val checkpoint = V2D.locateIndex(_position, game.track.primaryPath)
-
-    if(_lastCheckpoint + 1 == checkpoint && game.track.primaryPath(checkpoint).distSqr(_position) <= checkpointSqrDist) {
-      _lastCheckpoint = checkpoint
-    }
-
     //If we are on the last checkpoint, test if we passed the goal line
     if(_lastCheckpoint == game.track.primaryPath.length - 1) {
 
@@ -270,6 +263,16 @@ class Player
       if(coords.y >= 0) {
         _lastCheckpoint = 0
         lap += 1
+      }
+
+    }
+
+    else {
+      //Next checkpoint to check
+      val checkpoint = game.track.primaryPath(_lastCheckpoint + 1)
+
+      if(checkpoint.distSqr(_position) <= checkpointSqrDist) {
+        _lastCheckpoint += 1
       }
 
     }

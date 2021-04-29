@@ -11,7 +11,7 @@ class ComputerPlayer
   //The AI is given a bonus in turning speed because it can only follow
   //discrete track directions. An alternative to this would be to slerp between
   //directions (so the AI can smoothly transition between directions)
-  protected val AI_TURN_BONUS = 10D
+  protected val AI_TURN_BONUS = 3.3D
   protected val TURN_ANIMATION_COOLDOWN = 0.2
 
   //Parameters for AI calculations
@@ -33,7 +33,7 @@ class ComputerPlayer
 
 
   override def calculateTurnMult: Double = {
-    super.calculateTurnMult + AI_TURN_BONUS / game.track.roadWidth + (if(gear <= 2) AI_TURN_BONUS / 2 else 0)
+    super.calculateTurnMult * AI_TURN_BONUS //(if(gear <= 2) AI_TURN_BONUS / 2 else 0)
   }
 
 
@@ -71,7 +71,7 @@ class ComputerPlayer
     val angs = roadDirs.map(_ ang _direction).filterNot(_.isNaN) //For some reason there's NaNs, quick fix is to filter
     val roadCurviness = angs.map(d => d * d).sum / roadDirs.length
 
-    val desiredGear = decideGear(roadCurviness)
+    val desiredGear = math.min(5, decideGear(roadCurviness) + 2)
 
     if(gear < desiredGear) shiftGearUp(time, deltaT)
     if(gear > desiredGear) shiftGearDown(time, deltaT)
