@@ -1,3 +1,5 @@
+![image](https://user-images.githubusercontent.com/105944267/212245021-6f5bcb04-ba4e-424a-8152-c70d38b4fe96.png)
+
 # K00PECART
 
 **K00PECART** is a 1-2 player racing game written in Scala,
